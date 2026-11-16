@@ -1,0 +1,475 @@
+<!doctype html>
+<!--
+✒ Metadata
+    - Title: Agent Watch Page (dd1 Tools Edition - v1.12)
+    - File Name: index.html
+    - Relative Path: web/index.html
+    - Artifact Type: markup
+    - Version: 1.12.0
+    - Date: 11/16/2026
+    - Update: Monday, November 16, 2026
+    - Author: Dennis 'dendogg' Smaltz
+    - A.I. Acknowledgement: Anthropic - Claude Opus 5.5
+    - Signature: ︻デ═─── ✦ ✦ ✦ | Aim Twice, Shoot Once!
+
+✒ Changelog:
+    - 1.12.0 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — The
+      Sessions tab and view: the machine's sessions, the one in focus,
+      its activity with a session or machine scope, lanes and turns.
+    - 1.11.3 (11/15/2026) [dendogg + Anthropic - Claude Opus 5.5] — The line
+      under the name carries the logo's arrowheads between its words.
+    - 1.11.2 (11/15/2026) [dendogg + Anthropic - Claude Opus 5.5] — Live moves
+      from beside the name to the right-hand group, labelled Service; the name
+      stands over its line alone.
+    - 1.11.0 (11/15/2026) [dendogg + Anthropic - Claude Opus 5.5] — The
+      Insights tab and panel; the Timeline's grouped controls with zoom and
+      its explanation as a closed list; the Tests legend row; the Files note
+      as a closed list.
+    - 1.10.0 (11/15/2026) [dendogg + Anthropic - Claude Opus 5.5] — The Tests
+      view's filter row with a name filter; numeric headings marked; the Agent
+      card's result block renamed agent-result; Files' Edits heading with its
+      tooltip.
+    - 1.9.0 (11/15/2026) [dendogg + Anthropic - Claude Opus 5.5] — Activity's
+      agent tabs move out of the card's head onto their own row; the head gets
+      the agent count.
+    - 1.8.0 (11/15/2026) [dendogg + Anthropic - Claude Opus 5.5] — The header
+      from Dennis's review: header and view tabs in one sticky masthead, their
+      contents in the cards' column; Live beside the name with the time of the
+      last answer; the project as a masthead control; CPU and memory label
+      over value.
+    - 1.7.0 (11/15/2026) [dendogg + Anthropic - Claude Opus 5.5] — The header
+      shows Dennis's logo, inlined from assets/agent-watch-logo.svg between
+      two markers so the stylesheet can colour and move its parts, in place of
+      the binoculars icon.
+    - 1.6.0 (11/15/2026) [dendogg + Anthropic - Claude Opus 5.5] — The Profile
+      and Handoff tabs and panels.
+    - 1.5.0 (11/15/2026) [dendogg + Anthropic - Claude Opus 5.5] — The Tests,
+      Files and Compare tabs and panels.
+    - 1.4.0 (11/15/2026) [dendogg + Anthropic - Claude Opus 5.5] — The
+      Timeline tab and panel, and the notices bell with its panel in the
+      header.
+    - 1.3.0 (11/15/2026) [dendogg + Anthropic - Claude Opus 5.5] — The
+      Investigate tab and its panel: the incident list beside the chosen
+      incident.
+    - 1.2.0 (11/15/2026) [dendogg + Anthropic - Claude Opus 5.5] — The tab
+      bar, the Archive view's search, filter, table and pager, the Runs card's
+      Every run button; app.js loads as a module.
+    - 1.1.0 (11/15/2026) [dendogg + Anthropic - Claude Opus 5.5] — Places for
+      where the status came from, the test logs' attribution, the trunk's name
+      and the health register.
+    - 1.0.0 (11/14/2026) [dendogg + Anthropic - Claude Opus 5.5] — First
+      version.
+
+✒ Description:
+    The page agent-watch serves: one Claude Code workflow run followed live,
+    its phases, its agents' actions, the branch's commits, the test logs and
+    the machine, with the runs before it below. Fire Watch design system,
+    Parchment and Sentinel themes, as the digi cockpit.
+
+✒ Key Features:
+    - A header with the project picker, the live pulse and the machine's load
+    - The run: its title, workflow, branch, clock, tokens and a phase rail
+    - Activity: the chosen agent's actions, newest first, by kind
+    - Side cards: the agent's counts, the branch's commits, main's latest,
+      the test logs and the test ports
+    - Every run of the project in a table; choosing one shows it
+    - A strict Content Security Policy: scripts from this server only
+
+✒ Other Important Information:
+    - Dependencies: app.css, app.js; Google Fonts (Crimson Pro, Inter,
+      JetBrains Mono) and Phosphor Icons 2.1.2 from jsdelivr, pinned by hash
+    - Compatible platforms: current evergreen browsers
+-->
+<html lang="en" data-theme="parchment">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Agent Watch</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/duotone/style.css" integrity="sha384-UVFvhZP7fWAENUPOoq61rJg5ef6QZW0k5vpAn71041/QS4STvUcJQCGNhStZLGx9" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/fill/style.css" integrity="sha384-pPVoXE8ft+zxKtxIDDI7SfTK6y95NHm4qa+hKEg/hs8VkjW5IP+9/dGOPCbDpUPl" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" integrity="sha384-6p9AefaqUhEVheRlj1mpAkbngHXy9mbYMrIdcIt4Jlc9lOLIablJq3bBsLOjGwZ7" crossorigin="anonymous">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="masthead">
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <!-- logo: made from assets/agent-watch-logo.svg by logo-sync.mjs; do not edit by hand -->
+      <svg class="brand-logo" viewBox="0 0 2919.0017 1991.0724" role="img" aria-labelledby="brand-logo-title"><title id="brand-logo-title">Agent Watch</title><g transform="translate(842.35348,488.2041)"><g transform="matrix(7.5270805,0,0,7.5270805,-104175.62,-11757.463)"><path class="aw-cuff" d="m 13965.461,1657.2014 c -0.05,3.9647 -0.03,7.6199 0.08,10.3594 0.06,1.5596 0.162,2.8308 0.28,3.627 v 0.012 h 14.255 c 0.829,0 1.452,-0.1672 1.969,-0.4356 0.517,-0.2683 0.942,-0.6471 1.311,-1.1562 0.738,-1.0183 1.2,-2.5919 1.304,-4.2969 0.172,-2.8166 0.28,-5.5185 0.325,-8.1094 z"/><path class="aw-cuff" d="m 13859.19,1657.2014 c 0.05,2.59 0.153,5.2916 0.324,8.1094 0.105,1.7045 0.567,3.2786 1.305,4.2969 0.369,0.5091 0.793,0.8879 1.31,1.1562 0.517,0.2684 1.141,0.4356 1.969,0.4356 h 14.26 v -0.012 c 0.118,-0.7951 0.217,-2.0675 0.279,-3.627 0.11,-2.7393 0.122,-6.3942 0.08,-10.3594 z"/><path class="aw-suit" d="m 13893.242,1596.1428 c -8.187,3.6337 -15.814,7.3725 -21.638,13.5743 -7.218,7.6885 -12.355,21.251 -12.438,44.1015 h 19.494 c -0.107,-5.7006 -0.302,-11.6873 -0.48,-16.3945 -0.197,-5.1826 -0.198,-5.1821 -0.371,-8.8106 l -0.08,-1.7714 h 9.092 l -0.01,1.705 c -0.126,14.5416 -0.125,14.5423 -0.16,26.9668 -0.01,6.7545 0,12.927 0.06,15.6856 h 35.387 35.385 c 0.07,-2.7567 0.08,-8.9301 0.06,-15.6856 -0.03,-12.4241 -0.03,-12.4237 -0.162,-26.9648 l -0.02,-1.707 h 9.095 l -0.08,1.7714 c -0.172,3.6285 -0.173,3.628 -0.369,8.8106 -0.179,4.7072 -0.375,10.6939 -0.482,16.3945 h 19.494 c -0.08,-22.8505 -5.22,-36.4148 -12.438,-44.1035 -5.821,-6.1993 -13.447,-9.9359 -21.631,-13.5683 -1.719,1.3676 -3.9,2.9013 -6.521,4.3437 -17.449,9.5986 -37.637,6.4115 -51.176,-4.3477 z"/><path class="aw-eye" d="m 13935.067,1555.5413 c -2.433,2e-4 -4.368,1.936 -4.368,4.3691 0,2.4326 1.936,4.367 4.368,4.3672 2.433,2e-4 4.369,-1.9346 4.369,-4.3672 0,-2.433 -1.936,-4.3693 -4.369,-4.3691 z"/><path class="aw-eye" d="m 13909.098,1555.5413 c -2.433,-6e-4 -4.369,1.9354 -4.369,4.3691 0,2.4332 1.936,4.3678 4.369,4.3672 2.433,-2e-4 4.366,-1.9346 4.367,-4.3672 0,-2.4331 -1.934,-4.3689 -4.367,-4.3691 z"/><path class="aw-visor" d="m 13907.01,1543.3714 c -9.189,0 -16.537,7.3476 -16.537,16.5371 0,9.1893 7.348,16.5371 16.537,16.5371 h 30.152 c 9.189,0 16.539,-7.3484 16.539,-16.5371 0,-9.189 -7.35,-16.5371 -16.539,-16.5371 z m 2.088,8.7871 c 4.277,4e-4 7.751,3.4749 7.75,7.7519 0,4.2761 -3.473,7.7496 -7.75,7.75 -4.277,10e-4 -7.751,-3.4729 -7.752,-7.75 0,-4.278 3.474,-7.7529 7.752,-7.7519 z m 25.969,0 c 4.278,-3e-4 7.753,3.4741 7.752,7.7519 0,4.2769 -3.475,7.7503 -7.752,7.75 -4.276,-4e-4 -7.749,-3.4739 -7.75,-7.75 0,-4.277 3.473,-7.7515 7.75,-7.7519 z"/><path class="aw-suit" d="m 13922.071,1516.9729 c -23.737,0 -42.916,19.1916 -42.92,42.9297 0,12.7905 5.689,24.8537 15.431,32.9785 0.777,0.6484 1.583,1.273 2.414,1.8711 13.547,9.7562 35.644,12.2655 52.588,-1.8691 9.741,-8.1246 15.434,-20.1889 15.43,-32.9805 0,-23.7451 -19.191,-42.9302 -42.936,-42.9297 z m -15.061,23.0156 h 30.152 c 11.026,0 19.922,8.8936 19.922,19.92 0,11.0261 -8.896,19.9199 -19.922,19.9199 h -30.152 c -11.026,0 -19.92,-8.8934 -19.92,-19.9199 0,-11.0266 8.894,-19.92 19.92,-19.92 z"/><path class="aw-cuff" d="m 13878.239,1671.7464 c -0.04,0.08 -0.05,0.1435 -0.04,0.166 v -0.01 c 0,-0.01 0,-0.023 0.01,-0.039 0,-0.018 0.01,-0.041 0.02,-0.064 0,-0.017 0,-0.037 0,-0.057 z"/><path class="aw-cuff" d="m 13965.907,1671.7151 c 0,0.035 0.02,0.068 0.02,0.096 0,0.025 0.01,0.046 0.02,0.064 0,0.013 0,0.025 0,0.035 0,-0.025 0,-0.1016 -0.05,-0.1953 z"/><path class="aw-flow aw-f5" d="m 14063.797,1516.0583 -26.312,-18.143 -1.229,-0.753 -0.05,9.123 c 4.922,0.365 8.776,4.45 8.776,9.468 0,5.02 -3.856,9.103 -8.779,9.467 l 0.05,9.733 1.229,-0.754 z"/><path class="aw-flow aw-f1" d="m 13992.077,1515.9333 v 17.6 c 0,1.73 -1.393,3.122 -3.123,3.122 -1.729,0 -3.122,-1.392 -3.122,-3.122 v -17.6 c 0,-1.73 1.393,-3.123 3.122,-3.123 1.73,0 3.123,1.393 3.123,3.123 z"/><path class="aw-flow aw-f0" d="m 13992.147,1544.6083 v 17.6 c 0,1.729 -1.393,3.122 -3.123,3.122 -1.73,0 -3.122,-1.393 -3.122,-3.122 v -17.6 c 0,-1.73 1.393,-3.123 3.122,-3.123 1.73,0 3.123,1.393 3.123,3.123 z"/><path class="aw-flow aw-f2" d="m 14006.554,1519.0553 h -17.6 c -1.729,0 -3.122,-1.393 -3.122,-3.123 0,-1.73 1.393,-3.122 3.122,-3.122 h 17.6 c 1.73,0 3.123,1.392 3.123,3.122 0,1.73 -1.393,3.123 -3.123,3.123 z"/><path class="aw-flow aw-f3" d="m 14040.056,1646.2932 18.143,-26.3125 0.753,-1.2285 -9.123,-0.047 c -0.365,4.9216 -4.45,8.7753 -9.468,8.7753 -5.02,0 -9.103,-3.8561 -9.467,-8.7793 l -9.733,0.051 0.754,1.2285 z"/><path class="aw-flow aw-f2" d="m 14040.181,1574.5727 h -17.6 c -1.73,0 -3.122,-1.3927 -3.122,-3.1225 0,-1.7299 1.392,-3.1226 3.122,-3.1226 h 17.6 c 1.73,0 3.123,1.3927 3.123,3.1226 0,1.7298 -1.393,3.1225 -3.123,3.1225 z"/><path class="aw-flow aw-f0" d="m 14011.506,1574.6426 h -17.6 c -1.729,0 -3.122,-1.3927 -3.122,-3.1226 0,-1.7298 1.393,-3.1225 3.122,-3.1225 h 17.6 c 1.73,0 3.123,1.3927 3.123,3.1225 0,1.7299 -1.393,3.1226 -3.123,3.1226 z"/><path class="aw-flow aw-f3" d="m 14037.059,1589.05 v -17.5998 c 0,-1.7299 1.393,-3.1225 3.123,-3.1225 1.73,0 3.122,1.3926 3.122,3.1225 v 17.5998 c 0,1.7298 -1.392,3.1225 -3.122,3.1225 -1.73,0 -3.123,-1.3927 -3.123,-3.1225 z"/><path class="aw-flow aw-f9" d="m 13728.2,1710.246 27.027,18.143 1.261,0.753 0.05,-9.123 c -5.055,-0.365 -9.014,-4.45 -9.014,-9.468 0,-5.02 3.961,-9.103 9.018,-9.467 l -0.05,-9.733 -1.261,0.754 z"/><path class="aw-flow aw-f5" d="m 13801.866,1710.371 v -17.6 c 0,-1.73 1.431,-3.122 3.208,-3.122 1.777,0 3.207,1.392 3.207,3.122 v 17.6 c 0,1.73 -1.43,3.123 -3.207,3.123 -1.777,0 -3.208,-1.393 -3.208,-3.123 z"/><path class="aw-flow aw-f4" d="m 13801.795,1681.696 v -17.6 c 0,-1.729 1.43,-3.122 3.207,-3.122 1.777,0 3.207,1.393 3.207,3.122 v 17.6 c 0,1.73 -1.43,3.123 -3.207,3.123 -1.777,0 -3.207,-1.393 -3.207,-3.123 z"/><path class="aw-flow aw-f6" d="m 13786.996,1707.249 h 18.078 c 1.777,0 3.207,1.393 3.207,3.123 0,1.73 -1.43,3.122 -3.207,3.122 h -18.078 c -1.776,0 -3.207,-1.392 -3.207,-3.122 0,-1.73 1.431,-3.123 3.207,-3.123 z"/><path class="aw-flow aw-f6" d="m 13863.061,1761.6832 18.636,-26.3125 0.773,-1.2285 -9.37,-0.047 c -0.375,4.9216 -4.571,8.7753 -9.725,8.7753 -5.156,0 -9.35,-3.8561 -9.724,-8.7793 l -9.997,0.051 0.774,1.2285 z"/><path class="aw-flow aw-f2" d="m 13863.19,1689.9627 h -18.078 c -1.777,0 -3.206,-1.3927 -3.206,-3.1225 0,-1.7299 1.429,-3.1226 3.206,-3.1226 h 18.078 c 1.777,0 3.208,1.3927 3.208,3.1226 0,1.7298 -1.431,3.1225 -3.208,3.1225 z"/><path class="aw-flow aw-f4" d="m 13833.737,1690.0326 h -18.078 c -1.775,0 -3.206,-1.3927 -3.206,-3.1226 0,-1.7298 1.431,-3.1225 3.206,-3.1225 h 18.078 c 1.777,0 3.208,1.3927 3.208,3.1225 0,1.7299 -1.431,3.1226 -3.208,3.1226 z"/><path class="aw-flow aw-f2" d="m 13859.983,1704.44 v -17.5998 c 0,-1.7299 1.431,-3.1225 3.208,-3.1225 1.777,0 3.207,1.3926 3.207,3.1225 v 17.5998 c 0,1.7298 -1.43,3.1225 -3.207,3.1225 -1.777,0 -3.208,-1.3927 -3.208,-3.1225 z"/><path class="aw-flow aw-f5" d="m 13782.017,1516.058 26.312,-18.143 1.229,-0.753 0.05,9.123 c -4.922,0.365 -8.776,4.45 -8.776,9.468 0,5.02 3.857,9.103 8.78,9.467 l -0.05,9.733 -1.229,-0.754 z"/><path class="aw-flow aw-f1" d="m 13853.737,1515.933 v 17.6 c 0,1.73 1.393,3.122 3.123,3.122 1.73,0 3.122,-1.392 3.122,-3.122 v -17.6 c 0,-1.73 -1.392,-3.123 -3.122,-3.123 -1.73,0 -3.123,1.393 -3.123,3.123 z"/><path class="aw-flow aw-f0" d="m 13853.667,1544.608 v 17.6 c 0,1.729 1.393,3.122 3.123,3.122 1.73,0 3.122,-1.393 3.122,-3.122 v -17.6 c 0,-1.73 -1.392,-3.123 -3.122,-3.123 -1.73,0 -3.123,1.393 -3.123,3.123 z"/><path class="aw-flow aw-f2" d="m 13839.26,1519.055 h 17.6 c 1.73,0 3.122,-1.393 3.122,-3.123 0,-1.73 -1.392,-3.122 -3.122,-3.122 h -17.6 c -1.73,0 -3.123,1.392 -3.123,3.122 0,1.73 1.393,3.123 3.123,3.123 z"/><path class="aw-flow aw-f3" d="m 13805.758,1646.2932 -18.143,-26.3125 -0.753,-1.2285 9.123,-0.047 c 0.365,4.9216 4.45,8.7753 9.468,8.7753 5.02,0 9.103,-3.8561 9.467,-8.7793 l 9.733,0.051 -0.754,1.2285 z"/><path class="aw-flow aw-f2" d="m 13805.633,1574.5727 h 17.6 c 1.73,0 3.122,-1.3927 3.122,-3.1225 0,-1.7299 -1.392,-3.1226 -3.122,-3.1226 h -17.6 c -1.73,0 -3.123,1.3927 -3.123,3.1226 0,1.7298 1.393,3.1225 3.123,3.1225 z"/><path class="aw-flow aw-f0" d="m 13834.308,1574.6426 h 17.6 c 1.729,0 3.122,-1.3927 3.122,-3.1226 0,-1.7298 -1.393,-3.1225 -3.122,-3.1225 h -17.6 c -1.73,0 -3.123,1.3927 -3.123,3.1225 0,1.7299 1.393,3.1226 3.123,3.1226 z"/><path class="aw-flow aw-f2" d="m 13808.755,1589.05 v -17.5998 c 0,-1.7299 -1.393,-3.1225 -3.123,-3.1225 -1.73,0 -3.122,1.3926 -3.122,3.1225 v 17.5998 c 0,1.7298 1.392,3.1225 3.122,3.1225 1.73,0 3.123,-1.3927 3.123,-3.1225 z"/><path class="aw-flow aw-f9" d="m 14116,1710.246 -27.027,18.143 -1.261,0.753 -0.05,-9.123 c 5.055,-0.365 9.014,-4.45 9.014,-9.468 0,-5.02 -3.961,-9.103 -9.018,-9.467 l 0.05,-9.733 1.261,0.754 z"/><path class="aw-flow aw-f5" d="m 14042.334,1710.371 v -17.6 c 0,-1.73 -1.431,-3.122 -3.208,-3.122 -1.777,0 -3.207,1.392 -3.207,3.122 v 17.6 c 0,1.73 1.43,3.123 3.207,3.123 1.777,0 3.208,-1.393 3.208,-3.123 z"/><path class="aw-flow aw-f4" d="m 14042.405,1681.696 v -17.6 c 0,-1.729 -1.43,-3.122 -3.207,-3.122 -1.777,0 -3.207,1.393 -3.207,3.122 v 17.6 c 0,1.73 1.43,3.123 3.207,3.123 1.777,0 3.207,-1.393 3.207,-3.123 z"/><path class="aw-flow aw-f6" d="m 14057.204,1707.249 h -18.078 c -1.777,0 -3.207,1.393 -3.207,3.123 0,1.73 1.43,3.122 3.207,3.122 h 18.078 c 1.776,0 3.207,-1.392 3.207,-3.122 0,-1.73 -1.431,-3.123 -3.207,-3.123 z"/><g><path class="aw-arrow aw-f4" d="m 14022.932,1509.2656 c -3.644,0 -6.485,2.8417 -6.485,6.4864 0,3.6446 2.84,6.4843 6.485,6.4843 h 12.558 c 0.231,0 0.337,-0.01 0.336,-0.01 l 0.08,-0.01 0.08,-0.01 c 3.386,-0.2504 5.99,-2.9847 5.993,-6.4609 0,-3.4755 -2.603,-6.2139 -5.987,-6.4649 h -0.01 -0.01 c -0.147,-0.012 -0.304,-0.02 -0.469,-0.02 z"/><path class="aw-arrow aw-f3" d="m 14040.363,1598.9434 c -3.644,0 -6.484,2.8395 -6.484,6.4843 v 12.5586 c 0,0.2468 0,0.356 0,0.336 l 0.01,0.078 v 0.078 c 0.251,3.3867 2.986,5.9906 6.463,5.9922 v 0 c 3.474,0 6.21,-2.6038 6.461,-5.9883 v -0.016 -0.014 c 0.01,-0.1628 0.02,-0.3181 0.02,-0.4668 v -12.5586 c 0,-3.644 -2.842,-6.4843 -6.487,-6.4843 z"/><path class="aw-arrow aw-f8" d="m 13757.275,1704.0684 c -0.237,0 -0.356,0.01 -0.363,0.01 l -0.08,0.01 -0.08,0.01 c -3.561,0.2563 -6.223,3.0257 -6.225,6.4609 v 0 c 0,3.4315 2.662,6.2042 6.219,6.461 h 0.01 0.02 c 0.155,0.013 0.32,0.02 0.494,0.02 h 12.899 c 3.83,0 6.742,-2.8855 6.742,-6.4864 0,-3.6009 -2.912,-6.4843 -6.742,-6.4843 z"/><path class="aw-arrow aw-f4" d="m 13863.377,1714.334 c -3.831,0 -6.742,2.8833 -6.742,6.4844 v 12.5586 c 0,0.243 0,0.3519 0,0.3359 v 0.074 0.076 c 0.254,3.3457 3.067,5.9966 6.721,5.998 v 0 c 3.651,0 6.464,-2.6506 6.719,-5.9941 v -0.012 -0.012 c 0.01,-0.1629 0.02,-0.3181 0.02,-0.4668 v -12.5586 c 0,-3.6003 -2.914,-6.4844 -6.744,-6.4844 z"/><path class="aw-arrow aw-f3" d="m 13810.322,1509.2656 c -0.165,0 -0.316,0.01 -0.463,0.02 h -0.02 -0.02 c -3.385,0.251 -5.989,2.9882 -5.99,6.4629 v 0 c 0,3.4738 2.607,6.2086 5.994,6.459 l 0.08,0.01 0.08,0.01 c -0.02,0 0.09,0.01 0.334,0.01 h 12.561 c 3.645,0 6.484,-2.8378 6.484,-6.4824 0,-3.6447 -2.84,-6.4864 -6.484,-6.4864 z"/><path class="aw-arrow aw-f2" d="m 13805.451,1598.9434 c -3.645,0 -6.486,2.8403 -6.486,6.4843 v 12.5586 c 0,0.1649 0,0.3203 0.02,0.4668 v 0.014 0.016 c 0.251,3.3833 2.989,5.986 6.463,5.9883 v 0 c 3.476,0 6.209,-2.6047 6.459,-5.9922 v -0.078 l 0.01,-0.078 c 0,0 0,-0.1055 0,-0.336 v -12.5586 c 0,-3.6448 -2.84,-6.4843 -6.485,-6.4843 z"/><path class="aw-arrow aw-f8" d="m 14074.025,1704.0684 c -3.83,0 -6.742,2.8834 -6.742,6.4843 0,3.6009 2.913,6.4864 6.742,6.4864 h 12.901 c 0.174,0 0.336,-0.01 0.492,-0.02 h 0.02 0.01 c 3.557,-0.2568 6.219,-3.0302 6.221,-6.4629 0,-3.434 -2.665,-6.2065 -6.227,-6.4629 l -0.08,-0.01 -0.08,-0.01 c 0,0 -0.123,-0.01 -0.361,-0.01 z"/><path class="aw-arrow aw-f4" d="m 13980.824,1714.334 c -3.83,0 -6.744,2.8841 -6.744,6.4844 v 12.5586 c 0,0.1649 0,0.3202 0.02,0.4668 v 0.012 0.012 c 0.254,3.343 3.07,5.9929 6.722,5.9941 3.654,-5e-4 6.467,-2.6516 6.721,-5.998 v -0.076 l 0.01,-0.074 c 0,0.016 0,-0.093 0,-0.3359 v -12.5586 c 0,-3.6011 -2.911,-6.4844 -6.742,-6.4844 z"/></g><path class="aw-flow aw-f6" d="m 13981.138,1761.6832 -18.635,-26.3125 -0.773,-1.2285 9.37,-0.047 c 0.375,4.9216 4.571,8.7753 9.725,8.7753 5.156,0 9.35,-3.8561 9.724,-8.7793 l 9.997,0.051 -0.774,1.2285 z"/><path class="aw-flow aw-f2" d="m 13981.01,1689.9627 h 18.078 c 1.776,0 3.206,-1.3927 3.206,-3.1225 0,-1.7299 -1.43,-3.1226 -3.206,-3.1226 h -18.078 c -1.777,0 -3.208,1.3927 -3.208,3.1226 0,1.7298 1.431,3.1225 3.208,3.1225 z"/><path class="aw-flow aw-f4" d="m 14010.463,1690.0326 h 18.077 c 1.776,0 3.207,-1.3927 3.207,-3.1226 0,-1.7298 -1.431,-3.1225 -3.207,-3.1225 h -18.077 c -1.777,0 -3.208,1.3927 -3.208,3.1225 0,1.7299 1.431,3.1226 3.208,3.1226 z"/><path class="aw-flow aw-f2" d="m 13984.217,1704.44 v -17.5998 c 0,-1.7299 -1.431,-3.1225 -3.208,-3.1225 -1.777,0 -3.207,1.3926 -3.207,3.1225 v 17.5998 c 0,1.7298 1.43,3.1225 3.207,3.1225 1.777,0 3.208,-1.3927 3.208,-3.1225 z"/></g></g></svg>
+      <!-- /logo -->
+      <div class="brand-text">
+        <h1>Agent Watch</h1>
+        <p class="brand-sub" id="brand-sub"><span>Claude</span><svg class="brand-arrow" viewBox="0 0 6 8" aria-hidden="true" focusable="false"><path d="M1 1 L5 4 L1 7 Z"/></svg><span>Code</span><svg class="brand-arrow" viewBox="0 0 6 8" aria-hidden="true" focusable="false"><path d="M1 1 L5 4 L1 7 Z"/></svg><span>workflows</span></p>
+      </div>
+    </div>
+    <label class="context project-field">
+      <span class="context-label"><i class="ph ph-folder-simple" aria-hidden="true"></i>Project</span>
+      <span class="context-value"><select id="project" aria-label="Project"></select><i class="ph ph-caret-down" aria-hidden="true"></i></span>
+    </label>
+    <div class="top-right">
+      <div class="meter service">
+        <span class="meter-label">Service</span>
+        <span class="pulse" id="pulse" role="status" title="Polling every 2.5 s"><span class="dot" aria-hidden="true"></span><b id="pulse-text">Connecting</b><span class="pulse-time" id="pulse-time"></span></span>
+      </div>
+      <span class="top-rule" aria-hidden="true"></span>
+      <div class="meter" title="CPU, all cores">
+        <span class="meter-label">CPU</span>
+        <span class="meter-row"><span class="bar"><span id="cpu-bar"></span></span><span class="meter-value" id="cpu">-</span></span>
+      </div>
+      <div class="meter" title="Memory in use">
+        <span class="meter-label">RAM</span>
+        <span class="meter-row"><span class="bar"><span id="mem-bar"></span></span><span class="meter-value" id="mem">-</span></span>
+      </div>
+      <span class="top-rule" aria-hidden="true"></span>
+      <div class="bell-wrap">
+        <button class="icon-btn bell" id="bell" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="notices" title="Notices">
+          <i class="ph ph-bell" aria-hidden="true"></i><span class="bell-count" id="bell-count" hidden></span>
+        </button>
+        <div class="notices" id="notices" hidden role="dialog" aria-label="Notices">
+          <div class="notices-head"><b>Notices</b><button type="button" class="btn" id="notices-read">Mark all read</button></div>
+          <p class="why is-warn" id="notices-off" hidden>The service was started without watchpoints (--no-watch).</p>
+          <ol class="notices-list" id="notices-list"></ol>
+          <div class="notices-foot"><div class="notices-kinds" id="notices-kinds"></div>
+            <button type="button" class="btn" id="notices-desktop" aria-pressed="false">Desktop notices: off</button></div>
+        </div>
+      </div>
+      <button class="icon-btn" id="theme" type="button" aria-label="Switch theme" title="Switch between Parchment and Sentinel">
+        <i class="ph ph-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav class="views" id="views" aria-label="Views">
+  <div class="views-inner">
+    <div class="views-tabs">
+      <button type="button" data-view="live"><i class="ph-duotone ph-broadcast" aria-hidden="true"></i> Live</button>
+      <button type="button" data-view="sessions"><i class="ph-duotone ph-terminal-window" aria-hidden="true"></i> Sessions</button>
+      <button type="button" data-view="insights"><i class="ph-duotone ph-chart-bar" aria-hidden="true"></i> Insights</button>
+      <button type="button" data-view="investigate"><i class="ph-duotone ph-magnifying-glass-plus" aria-hidden="true"></i> Investigate</button>
+      <button type="button" data-view="timeline"><i class="ph-duotone ph-chart-line" aria-hidden="true"></i> Timeline</button>
+      <button type="button" data-view="tests"><i class="ph-duotone ph-flask" aria-hidden="true"></i> Tests</button>
+      <button type="button" data-view="files"><i class="ph-duotone ph-files" aria-hidden="true"></i> Files</button>
+      <button type="button" data-view="profile"><i class="ph-duotone ph-gauge" aria-hidden="true"></i> Profile</button>
+      <button type="button" data-view="handoff"><i class="ph-duotone ph-handshake" aria-hidden="true"></i> Handoff</button>
+      <button type="button" data-view="compare"><i class="ph-duotone ph-columns" aria-hidden="true"></i> Compare</button>
+      <button type="button" data-view="archive"><i class="ph-duotone ph-archive" aria-hidden="true"></i> Archive</button>
+    </div>
+    <span class="views-run" id="views-run"></span>
+  </div>
+</nav>
+</div>
+
+<main class="page" id="view-live">
+  <section class="card hero" aria-labelledby="run-title">
+    <div class="hero-head">
+      <div class="hero-titles">
+        <p class="eyebrow" id="run-workflow">Waiting for a run</p>
+        <h2 id="run-title">No workflow run yet</h2>
+        <p class="hero-desc" id="run-desc"></p>
+      </div>
+      <span class="status-pill" id="run-status">-</span>
+    </div>
+    <dl class="facts" id="run-facts"></dl>
+    <p class="why" id="run-why"></p>
+    <ol class="rail" id="rail" aria-label="Phases"></ol>
+  </section>
+
+  <section class="card activity" aria-labelledby="activity-title">
+    <div class="card-head">
+      <h3 id="activity-title"><i class="ph-duotone ph-pulse" aria-hidden="true"></i> Activity</h3>
+      <span class="muted" id="activity-count"></span>
+    </div>
+    <div class="agent-tabs" id="agent-tabs" role="tablist" aria-label="Agents"></div>
+    <ol class="feed" id="feed"></ol>
+    <p class="empty" id="feed-empty" hidden>Nothing yet. The agent's actions appear here as it works.</p>
+  </section>
+
+  <aside class="side">
+    <section class="card" aria-labelledby="agent-title">
+      <div class="card-head"><h3 id="agent-title"><i class="ph-duotone ph-robot" aria-hidden="true"></i> Agent</h3><span class="muted" id="agent-name"></span></div>
+      <div class="stats" id="agent-stats"></div>
+      <div class="tools" id="agent-tools"></div>
+      <div class="agent-result" id="agent-result"></div>
+    </section>
+    <section class="card" aria-labelledby="branch-title">
+      <div class="card-head"><h3 id="branch-title"><i class="ph-duotone ph-git-branch" aria-hidden="true"></i> Branch</h3><span class="muted mono" id="branch-name"></span></div>
+      <ol class="commits" id="branch-commits"></ol>
+      <h4 class="sub" id="trunk-label">main</h4>
+      <ol class="commits" id="main-commits"></ol>
+    </section>
+    <section class="card" aria-labelledby="tests-title">
+      <div class="card-head"><h3 id="tests-title"><i class="ph-duotone ph-flask" aria-hidden="true"></i> Tests</h3><span class="ports" id="ports"></span></div>
+      <p class="why is-warn" id="logs-why"></p>
+      <ol class="logs" id="logs"></ol>
+    </section>
+  </aside>
+
+  <section class="card runs" aria-labelledby="runs-title">
+    <div class="card-head"><h3 id="runs-title"><i class="ph-duotone ph-stack" aria-hidden="true"></i> Runs</h3><span class="head-right"><span class="muted" id="runs-count"></span><button type="button" class="btn" id="open-archive"><i class="ph ph-archive" aria-hidden="true"></i> Every run</button></span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">Run</th><th scope="col">Workflow</th><th scope="col">Status</th><th scope="col">Started</th><th scope="col" class="num">Took</th><th scope="col" class="num">Agents</th><th scope="col" class="num">Tokens</th></tr></thead>
+        <tbody id="runs"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<main class="page sess-page" id="view-sessions" hidden>
+  <section class="card sess-machine" aria-labelledby="sess-list-title">
+    <div class="card-head">
+      <h3 id="sess-list-title"><i class="ph-duotone ph-terminal-window" aria-hidden="true"></i> Claude on this machine</h3>
+      <div class="sess-controls">
+        <span class="muted" id="sess-count"></span>
+        <button type="button" class="chip" id="sess-follow" aria-pressed="true" title="Follow whichever open session is working, switching as the work moves"><i class="ph ph-crosshair-simple" aria-hidden="true"></i> Follow the work</button>
+        <button type="button" class="chip" id="sess-closed" aria-pressed="false" title="Also list sessions closed in the last day"><i class="ph ph-clock-counter-clockwise" aria-hidden="true"></i> Closed in the last day</button>
+      </div>
+    </div>
+    <ul class="sess-list" id="sess-list" aria-label="Sessions"></ul>
+  </section>
+
+  <section class="card hero sess-hero" aria-labelledby="sess-title">
+    <div class="hero-head">
+      <div class="hero-titles">
+        <p class="eyebrow" id="sess-eyebrow">Sessions</p>
+        <h2 id="sess-title">Looking for Claude</h2>
+        <p class="hero-desc" id="sess-prompt"></p>
+      </div>
+      <span class="status-pill" id="sess-state">-</span>
+    </div>
+    <p class="sess-now" id="sess-now" role="status"></p>
+    <dl class="facts" id="sess-facts"></dl>
+    <p class="why" id="sess-why"></p>
+    <div id="sess-how"></div>
+  </section>
+
+  <section class="card activity sess-activity" aria-labelledby="sess-activity-title">
+    <div class="card-head">
+      <h3 id="sess-activity-title"><i class="ph-duotone ph-pulse" aria-hidden="true"></i> Activity</h3>
+      <div class="seg sess-scope" id="sess-scope" role="group" aria-label="Whose activity">
+        <button type="button" data-scope="session" aria-pressed="true"><i class="ph ph-crosshair-simple" aria-hidden="true"></i> This session</button>
+        <button type="button" data-scope="machine" aria-pressed="false"><i class="ph ph-desktop-tower" aria-hidden="true"></i> Everything on this machine</button>
+      </div>
+    </div>
+    <div class="agent-tabs" id="sess-lanes" role="tablist" aria-label="Lanes"></div>
+    <div class="filter-row"><div class="badges" id="sess-kinds" role="group" aria-label="Show these kinds"></div><span class="muted" id="sess-feed-count"></span></div>
+    <p class="why is-warn sess-range" id="sess-range" hidden></p>
+    <ol class="feed" id="sess-feed"></ol>
+    <p class="empty" id="sess-feed-empty" hidden></p>
+  </section>
+
+  <aside class="side">
+    <section class="card" aria-labelledby="sess-agents-title">
+      <div class="card-head"><h3 id="sess-agents-title"><i class="ph-duotone ph-robot" aria-hidden="true"></i> Agents</h3><span class="muted" id="sess-agents-count"></span></div>
+      <ol class="mini-list sess-items" id="sess-agents"></ol>
+    </section>
+    <section class="card" aria-labelledby="sess-jobs-title">
+      <div class="card-head"><h3 id="sess-jobs-title"><i class="ph-duotone ph-tree-structure" aria-hidden="true"></i> Workflows and background</h3><span class="muted" id="sess-jobs-count"></span></div>
+      <ol class="mini-list sess-items" id="sess-jobs"></ol>
+    </section>
+    <section class="card" aria-labelledby="sess-turns-title">
+      <div class="card-head"><h3 id="sess-turns-title"><i class="ph-duotone ph-chats-circle" aria-hidden="true"></i> Turns</h3><span class="muted" id="sess-turns-count"></span></div>
+      <ol class="mini-list sess-items" id="sess-turns"></ol>
+    </section>
+    <section class="card" aria-labelledby="sess-tools-title">
+      <div class="card-head"><h3 id="sess-tools-title"><i class="ph-duotone ph-wrench" aria-hidden="true"></i> Tools and cost</h3></div>
+      <div class="stats" id="sess-stats"></div>
+      <div class="tools" id="sess-tools"></div>
+      <div class="agent-result" id="sess-cost"></div>
+    </section>
+  </aside>
+</main>
+
+<main class="page page-one" id="view-insights" hidden>
+  <section class="card" aria-labelledby="ins-title">
+    <div class="card-head"><h3 id="ins-title"><i class="ph-duotone ph-chart-bar" aria-hidden="true"></i> Insights</h3><span class="muted" id="ins-run"></span></div>
+    <div class="seg" id="ins-scope" role="group" aria-label="What to chart">
+      <button type="button" data-scope="run" aria-pressed="true"><i class="ph ph-crosshair-simple" aria-hidden="true"></i> This run</button>
+      <button type="button" data-scope="project" aria-pressed="false"><i class="ph ph-stack" aria-hidden="true"></i> Every run of the project</button>
+    </div>
+    <div id="ins-body" aria-live="polite"></div>
+  </section>
+</main>
+
+<main class="page page-one" id="view-archive" hidden>
+  <section class="card" aria-labelledby="archive-title">
+    <div class="card-head"><h3 id="archive-title"><i class="ph-duotone ph-archive" aria-hidden="true"></i> Archive</h3><span class="muted" id="archive-status"></span></div>
+    <form class="search" id="archive-form" role="search">
+      <label class="search-field"><i class="ph ph-magnifying-glass" aria-hidden="true"></i><span class="sr-only">Search every run</span>
+        <input id="archive-q" type="search" autocomplete="off" spellcheck="false" placeholder="Commands, files, tests, commits, errors, or field:value"></label>
+      <label class="select-field"><span class="sr-only">Status</span>
+        <select id="archive-filter"><option value="">Any status</option><option value="completed">completed</option><option value="killed">killed</option><option value="unfinished">unfinished</option><option value="running">running</option><option value="failed">failed</option></select></label>
+      <button type="submit" class="btn btn-primary">Search</button>
+      <button type="button" class="btn" id="archive-clear">Clear</button>
+    </form>
+    <p class="hint">Narrow with
+      <button type="button" class="chip" data-archive-q="file:">file:</button>
+      <button type="button" class="chip" data-archive-q="test:">test:</button>
+      <button type="button" class="chip" data-archive-q="cmd:">cmd:</button>
+      <button type="button" class="chip" data-archive-q="commit:">commit:</button>
+      <button type="button" class="chip" data-archive-q="error:">error:</button>
+      <button type="button" class="chip" data-archive-q="agent:">agent:</button>
+      <button type="button" class="chip" data-archive-q="branch:">branch:</button>
+      <button type="button" class="chip" data-archive-q="workflow:">workflow:</button>
+      <button type="button" class="chip" data-archive-q="status:">status:</button>
+      Every word given must match.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">Run</th><th scope="col">Workflow</th><th scope="col">Status</th><th scope="col">Started</th><th scope="col" class="num">Took</th><th scope="col" class="num">Agents</th><th scope="col" class="num">Errors</th><th scope="col" class="num">Commits</th><th scope="col" class="num">Tokens</th></tr></thead>
+        <tbody id="archive-rows"></tbody>
+      </table>
+    </div>
+    <p class="empty" id="archive-empty" hidden></p>
+    <div class="pager"><span class="muted" id="archive-range"></span>
+      <button type="button" class="btn" id="archive-prev"><i class="ph ph-caret-left" aria-hidden="true"></i> Newer</button>
+      <button type="button" class="btn" id="archive-next">Older <i class="ph ph-caret-right" aria-hidden="true"></i></button></div>
+  </section>
+</main>
+
+<main class="page page-one" id="view-investigate" hidden>
+  <section class="card" aria-labelledby="inv-title">
+    <div class="card-head"><h3 id="inv-title"><i class="ph-duotone ph-magnifying-glass-plus" aria-hidden="true"></i> Investigate</h3><span class="muted" id="inv-run"></span></div>
+    <div class="inv">
+      <ol class="inv-list" id="inv-list" aria-label="Incidents"></ol>
+      <div class="inv-detail" id="inv-detail" aria-live="polite"></div>
+    </div>
+  </section>
+</main>
+
+<main class="page page-one" id="view-timeline" hidden>
+  <section class="card" aria-labelledby="tl-title">
+    <div class="card-head"><h3 id="tl-title"><i class="ph-duotone ph-chart-line" aria-hidden="true"></i> Timeline</h3><span class="muted" id="tl-run"></span></div>
+    <div class="tl-controls">
+      <div class="tl-group" role="group" aria-label="Replay">
+        <button type="button" class="btn btn-primary" id="tl-play"><i class="ph ph-play" aria-hidden="true"></i> Play</button>
+        <button type="button" class="btn" id="tl-prev" title="One step back" aria-label="One step back"><i class="ph ph-caret-left" aria-hidden="true"></i></button>
+        <button type="button" class="btn" id="tl-next" title="One step on" aria-label="One step on"><i class="ph ph-caret-right" aria-hidden="true"></i></button>
+        <label class="select-field is-compact"><span class="sr-only">Speed</span><select id="tl-speed"><option value="1">1×</option><option value="2">2×</option><option value="5">5×</option></select></label>
+      </div>
+      <div class="tl-group" role="group" aria-label="Jump">
+        <button type="button" class="btn" id="tl-next-error"><i class="ph ph-warning-octagon" aria-hidden="true"></i> Next failure</button>
+        <button type="button" class="btn" id="tl-next-test"><i class="ph ph-flask" aria-hidden="true"></i> Next failing test</button>
+      </div>
+      <div class="tl-group" role="group" aria-label="Zoom">
+        <button type="button" class="btn" id="tl-zoom-out" title="Zoom out" aria-label="Zoom out"><i class="ph ph-magnifying-glass-minus" aria-hidden="true"></i></button>
+        <button type="button" class="btn" id="tl-zoom-in" title="Zoom in around the playhead" aria-label="Zoom in"><i class="ph ph-magnifying-glass-plus" aria-hidden="true"></i></button>
+        <button type="button" class="btn" id="tl-zoom-fit" title="Show the whole run"><i class="ph ph-arrows-out-line-horizontal" aria-hidden="true"></i> Fit</button>
+        <span class="muted mono" id="tl-zoom-level"></span>
+      </div>
+      <div class="tl-where"><span class="mono" id="tl-pos"></span><span class="muted" id="tl-range"></span></div>
+    </div>
+    <input class="tl-slider" id="tl-slider" type="range" min="0" max="0" value="0" aria-label="Playhead: the event shown">
+    <div class="tl-kinds" id="tl-kinds" aria-label="Kinds shown"></div>
+    <div class="tl-lanes" id="tl-lanes"></div>
+    <div class="tl-detail" id="tl-detail" aria-live="polite"></div>
+    <details class="how">
+      <summary><i class="ph ph-info" aria-hidden="true"></i> How to read the timeline</summary>
+      <ul>
+        <li>Each agent is a lane; its faint band runs from its first event to its last.</li>
+        <li>A mark is an event at the moment its line was written. A tool call long enough to see is a bar as long as it took.</li>
+        <li>Red marks failed: an error, a failing test, a commit that did not happen.</li>
+        <li>Drag across the time axis to zoom to a stretch; click a phase to zoom to it; Fit shows the whole run again.</li>
+        <li>The Activity row is always the whole run; while zoomed it shows where you are, and a click moves there.</li>
+        <li>Replay steps through what was recorded; nothing is run again. Two agents' events in the same millisecond are outlined, since their order is not known.</li>
+        <li>A lane's label hides or shows it; the kind chips above hide or show a kind.</li>
+      </ul>
+    </details>
+  </section>
+</main>
+
+<main class="page page-one" id="view-tests" hidden>
+  <section class="card" aria-labelledby="tests-title">
+    <div class="card-head"><h3 id="tests-title"><i class="ph-duotone ph-flask" aria-hidden="true"></i> Tests</h3><span class="muted" id="tests-run"></span></div>
+    <div class="filter-row">
+      <div class="badges" id="tests-counts"></div>
+      <label class="search-field is-small"><i class="ph ph-magnifying-glass" aria-hidden="true"></i><span class="sr-only">Filter cases by name</span>
+        <input id="tests-q" type="search" autocomplete="off" spellcheck="false" placeholder="Filter cases by name"></label>
+    </div>
+    <p class="hint" id="tests-note"></p>
+    <p class="history-legend" id="tests-legend"></p>
+    <div class="hint" id="tests-compared"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">Case</th><th scope="col">Now</th><th scope="col">Against earlier runs</th><th scope="col">Earlier runs → this run</th><th scope="col">Read from</th></tr></thead>
+        <tbody id="tests-rows"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<main class="page page-one" id="view-files" hidden>
+  <section class="card" aria-labelledby="files-title">
+    <div class="card-head"><h3 id="files-title"><i class="ph-duotone ph-files" aria-hidden="true"></i> Files</h3><span class="muted" id="files-run"></span></div>
+    <div class="badges" id="files-counts"></div>
+    <div id="files-note"></div>
+    <div class="inv inv-wide">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">File</th><th scope="col">Agents</th><th scope="col" class="num" title="Edits that came back ok, then any that failed">Edits</th><th scope="col" class="num">Reads</th><th scope="col">Commits</th><th scope="col">Risk</th></tr></thead>
+          <tbody id="files-rows"></tbody>
+        </table>
+      </div>
+      <div class="inv-detail" id="files-history" aria-live="polite"></div>
+    </div>
+  </section>
+</main>
+
+<main class="page page-one" id="view-compare" hidden>
+  <section class="card" aria-labelledby="cmp-title">
+    <div class="card-head"><h3 id="cmp-title"><i class="ph-duotone ph-columns" aria-hidden="true"></i> Compare</h3><span class="muted" id="cmp-note"></span></div>
+    <div class="cmp-pick">
+      <label class="select-field"><span class="pick-label">A</span><select id="cmp-a" aria-label="Run A"></select></label>
+      <button type="button" class="btn" id="cmp-swap" title="Swap A and B"><i class="ph ph-arrows-left-right" aria-hidden="true"></i></button>
+      <label class="select-field"><span class="pick-label">B</span><select id="cmp-b" aria-label="Run B"></select></label>
+    </div>
+    <div class="inv">
+      <div>
+        <h4 class="sub">Related to A</h4>
+        <ol class="mini-list related-list" id="cmp-related"></ol>
+        <p class="hint" id="cmp-related-note"></p>
+      </div>
+      <div class="inv-detail" id="cmp-body"></div>
+    </div>
+  </section>
+</main>
+
+<main class="page page-one" id="view-profile" hidden>
+  <section class="card" aria-labelledby="prof-title">
+    <div class="card-head"><h3 id="prof-title"><i class="ph-duotone ph-gauge" aria-hidden="true"></i> Profile</h3><span class="muted" id="prof-run"></span></div>
+    <div class="stats prof-stats" id="prof-stats"></div>
+    <h4 class="sub">Phases, in the order they started</h4>
+    <div class="prof-rows" id="prof-phases"></div>
+    <h4 class="sub">Agents</h4>
+    <div class="prof-rows" id="prof-agents"></div>
+    <div class="inv-cols">
+      <section class="inv-sec"><h4 class="sub">The longest tool calls</h4><ol class="mini-list" id="prof-longest"></ol></section>
+      <section class="inv-sec" id="prof-rework"></section>
+    </div>
+    <ul class="hint prof-notes" id="prof-notes"></ul>
+  </section>
+</main>
+
+<main class="page page-one" id="view-handoff" hidden>
+  <section class="card" aria-labelledby="ho-title">
+    <div class="card-head"><h3 id="ho-title"><i class="ph-duotone ph-handshake" aria-hidden="true"></i> Handoff</h3><span class="muted" id="ho-run"></span></div>
+    <div id="ho-body"></div>
+  </section>
+</main>
+
+<footer class="status-bar">
+  <span id="foot-version">agent-watch</span>
+  <span id="foot-paths" class="mono"></span>
+  <span id="foot-health" class="foot-health"></span>
+  <span id="foot-error" class="foot-error" role="status"></span>
+</footer>
+<script type="module" src="app.js"></script>
+</body>
+</html>

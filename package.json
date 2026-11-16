@@ -1,0 +1,18 @@
+{
+  "name": "digispace-agent-watch",
+  "version": "1.12.1",
+  "private": true,
+  "license": "Apache-2.0",
+  "repository": { "type": "git", "url": "git+https://github.com/dnoice/agent-watch.git" },
+  "homepage": "https://github.com/dnoice/agent-watch#readme",
+  "bugs": { "url": "https://github.com/dnoice/agent-watch/issues" },
+  "type": "module",
+  "description": "Follow Claude Code live in a local page: every terminal session on the machine and its workflow runs. See the header in agent-watch.mjs; npm cannot carry comments, so the house header lives in the sibling file package.metadata.md.",
+  "bin": { "agent-watch": "agent-watch.mjs" },
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node agent-watch.mjs start",
+    "stop": "node agent-watch.mjs stop",
+    "test": "node test_agent_watch.mjs"
+  }
+}

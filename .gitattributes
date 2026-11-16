@@ -1,0 +1,42 @@
+# ✒ Metadata
+#     - Title: Agent Watch Git Attributes (dd1 Tools Edition - v1.0)
+#     - File Name: .gitattributes
+#     - Relative Path: .gitattributes
+#     - Artifact Type: config
+#     - Version: 1.0.0
+#     - Date: 11/16/2026
+#     - Update: Monday, November 16, 2026
+#     - Author: Dennis 'dendogg' Smaltz
+#     - A.I. Acknowledgement: Anthropic - Claude Opus 5.5
+#     - Signature: ︻デ═─── ✦ ✦ ✦ | Aim Twice, Shoot Once!
+#
+# ✒ Description:
+#     agent-watch is LF throughout. Text is stored and checked out as LF
+#     whatever a machine's core.autocrlf says, so a checkout on Windows
+#     never rewrites a file's endings; binaries are left as they are.
+#
+# ✒ Key Features:
+#     - Text stored and checked out as LF on every machine
+#     - Windows batch files check out as CRLF, which cmd.exe needs
+#     - Images and fonts marked binary, never converted or diffed as text
+#     - The logo's SVGs stay text, so their edits can be read in a diff
+#
+# ✒ Other Important Information:
+#     - Dependencies: git.
+#     - Compatible platforms: any git client.
+#     - Later lines win: the specific rules must stay below the * line.
+# ---------
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.svg text eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary

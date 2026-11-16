@@ -1,0 +1,127 @@
+# =====================================================================
+# ✒ Metadata
+#     - Title: Agent Watch Ignore Rules (dd1 Tools Edition - v1.0)
+#     - File Name: .gitignore
+#     - Relative Path: .gitignore
+#     - Artifact Type: config
+#     - Version: 1.0.0
+#     - Date: 11/16/2026
+#     - Update: Monday, November 16, 2026
+#     - Author: Dennis 'dendogg' Smaltz
+#     - A.I. Acknowledgement: Anthropic - Claude Opus 5.5
+#     - Signature: ︻デ═─── ✦ ✦ ✦ | Aim Twice, Shoot Once!
+#
+# ✒ Description:
+#     What git never takes from an agent-watch checkout. The tool has no
+#     dependencies and writes its state outside the repository, so most of
+#     these rules guard against what a person or another tool leaves
+#     behind: transcripts copied in to debug, secrets, editor and OS files.
+#
+# ✒ Key Features:
+#     - Claude Code transcripts (*.jsonl) are never committed: they hold
+#       prompts and tool output, which is exactly what this tool reads
+#     - Secrets and machine-local settings: .env files, keys, .npmrc,
+#       Claude Code's settings.local.json and CLAUDE.local.md
+#     - agent-watch's own state, in case AGENT_WATCH_STATE points here:
+#       state.json, the log, notices.json, archive/ and criteria/
+#     - Dependency trees and lockfiles: there are no dependencies to lock
+#     - Test and coverage output, npm pack tarballs, handoff reports
+#     - Inkscape backups and autosaves of the logo's master
+#     - Editor, OS and temp leftovers for Windows, macOS and Linux
+#
+# ✒ Other Important Information:
+#     - Dependencies: git 2.x
+#     - Compatible platforms: any git client
+#     - `git check-ignore -v <path>` names the rule that matched a path.
+#     - Per-machine exclusions belong in .git/info/exclude, not here.
+# ---------
+# =====================================================================
+
+# --- Claude Code transcripts ------------------------------------------------
+# A session transcript holds the person's prompts and every tool's output.
+# The suite builds its fixtures in the OS temp folder, so none belongs here.
+*.jsonl
+
+# --- Secrets and machine-local settings ------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.npmrc
+.claude/settings.local.json
+CLAUDE.local.md
+
+# --- agent-watch state, if AGENT_WATCH_STATE points into the checkout -------
+# By default it lives in %LOCALAPPDATA%\agent-watch on Windows and
+# ~/.local/state/agent-watch elsewhere.
+/state.json
+/agent-watch.log
+/notices.json
+/archive/
+/criteria/
+
+# --- Dependencies and package-manager output -------------------------------
+# agent-watch uses Node's own modules only; nothing is installed.
+node_modules/
+jspm_packages/
+.pnp.*
+.yarn/
+.npm/
+package-lock.json
+npm-shrinkwrap.json
+yarn.lock
+pnpm-lock.yaml
+*.tgz
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Logs, reports and test output ----------------------------------------
+*.log
+logs/
+coverage/
+.nyc_output/
+*.lcov
+test-results/
+playwright-report/
+captures/
+shots/
+/handoff*.md
+/handoff*.json
+
+# --- Inkscape leftovers from editing the logo -------------------------------
+*.svg.[0-9][0-9][0-9][0-9]_[0-9][0-9]_[0-9][0-9]_*.svg
+_autosaves/
+
+# --- Editors ----------------------------------------------------------------
+.vscode/
+.idea/
+.history/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# --- Operating systems ------------------------------------------------------
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# --- Temp and merge leftovers ----------------------------------------------
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
