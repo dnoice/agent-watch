@@ -6,7 +6,7 @@
  *     - File Name: agent-watch.mjs
  *     - Relative Path: agent-watch.mjs
  *     - Artifact Type: CLI
- *     - Version: 1.13.0
+ *     - Version: 1.13.1
  *     - Date: 11/16/2026
  *     - Update: Monday, November 16, 2026
  *     - Author: Dennis 'dendogg' Smaltz
@@ -14,6 +14,8 @@
  *     - Signature: ︻デ═─── ✦ ✦ ✦ | Aim Twice, Shoot Once!
  *
  * ✒ Changelog:
+ *     - 1.13.1 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Version
+ *       1.13.1, from the first run inside a cloud environment.
  *     - 1.13.0 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Version
  *       1.13.0, in other environments: --allow-host and AGENT_WATCH_HOSTS
  *       answer a preview pane or port forward that reaches the page under
@@ -151,7 +153,7 @@
  *
  * ✒ Other Important Information:
  *     - Dependencies: Node.js 20+; git on PATH for the commits, and netstat
- *       (Windows) or ss (Linux) for the test ports (optional)
+ *       on Windows for the test ports (optional; Linux uses ss or /proc)
  *     - Compatible platforms: Windows 11 (primary); macOS and Linux
  *     - State: %LOCALAPPDATA%\agent-watch on Windows, ~/.local/state/
  *       agent-watch elsewhere, or AGENT_WATCH_STATE (state.json with the
@@ -179,7 +181,7 @@ import { casesOf } from './lib/compare.mjs';
 import { fileMap } from './lib/files.mjs';
 import { loadCriteria, evaluate, report, writeStarter, TYPES } from './lib/handoff.mjs';
 
-export const VERSION = '1.13.0';
+export const VERSION = '1.13.1';
 const SELF = fileURLToPath(import.meta.url);
 const STATE_DIR = process.env.AGENT_WATCH_STATE
   || (process.platform === 'win32'

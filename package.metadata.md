@@ -4,7 +4,7 @@
     - File Name: package.json
     - Relative Path: package.json
     - Artifact Type: config
-    - Version: 1.13.0
+    - Version: 1.13.1
     - Date: 11/16/2026
     - Update: Monday, November 16, 2026
     - Author: Dennis 'dendogg' Smaltz
@@ -12,6 +12,8 @@
     - Signature: ︻デ═─── ✦ ✦ ✦ | Aim Twice, Shoot Once!
 
 ✒ Changelog:
+    - 1.13.1 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Version
+      1.13.1.
     - 1.13.0 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Version
       1.13.0, other environments.
     - 1.12.1 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Version

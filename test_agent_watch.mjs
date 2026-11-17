@@ -6,7 +6,7 @@
  *     - File Name: test_agent_watch.mjs
  *     - Relative Path: test_agent_watch.mjs
  *     - Artifact Type: test
- *     - Version: 1.13.0
+ *     - Version: 1.13.1
  *     - Date: 11/16/2026
  *     - Update: Monday, November 16, 2026
  *     - Author: Dennis 'dendogg' Smaltz
@@ -14,6 +14,10 @@
  *     - Signature: ︻デ═─── ✦ ✦ ✦ | Aim Twice, Shoot Once!
  *
  * ✒ Changelog:
+ *     - 1.13.1 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Checks
+ *       from the first run in a cloud environment: ports from /proc,
+ *       test scripts in a tests folder, and a background command from
+ *       before a restart. 286 checks.
  *     - 1.13.0 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Checks
  *       for other environments: Host names allowed and refused, the
  *       refusal's message, --allow-host's guard, and the test ports from
@@ -126,9 +130,9 @@ import path from 'node:path';
 import http from 'node:http';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { metaOf, toolSummary, readNew, listProjects, createCollector, facts, listeningPorts } from './lib/collect.mjs';
+import { metaOf, toolSummary, readNew, listProjects, createCollector, facts, listeningPorts, procListening } from './lib/collect.mjs';
 import { readNewAsync, createHealth, readJson } from './lib/read.mjs';
-import { freshAgent, ingestAgentLine, agentStats, argsOf } from './lib/claude.mjs';
+import { freshAgent, ingestAgentLine, agentStats, argsOf, kindOf } from './lib/claude.mjs';
 import { parseTestOutput, verdict, classify } from './lib/tests.mjs';
 import { createGit, parseLog } from './lib/git.mjs';
 import { redact, excerpt } from './lib/evidence.mjs';
@@ -886,6 +890,27 @@ check('hostName reads a Host header\'s name without its port, and refuses what i
   const ds = await dc.state(SLUG);
   check('a platform with no port listing asks nothing and says the ports are unavailable', none.length === 0 && ds.ports.length === 0 && ds.portsWhy.completeness === 'unavailable');
   dc.close();
+  const proc4 = [
+    '  sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode',
+    '   0: 0100007F:150E 00000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 12345 1 0000000000000000 100 0 0 10 0',
+    '   1: 00000000:150F 00000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 12346 1 0000000000000000 100 0 0 10 0',
+    '   2: 0400000A:1511 00000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 12347 1 0000000000000000 100 0 0 10 0',
+    '   3: 0100007F:150E 0100007F:D431 01 00000000:00000000 00:00000000 00000000     0        0 12348 1 0000000000000000 20 4 30 10 -1',
+  ].join('\n');
+  const proc6 = '   0: 00000000000000000000000001000000:1510 00000000000000000000000000000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 22345 1 0000000000000000 100 0 0 10 0';
+  check('/proc/net/tcp and tcp6 give the ports in range listening on loopback or every address',
+    JSON.stringify(procListening(`${proc4}\n${proc6}`, 5390, 5393)) === JSON.stringify([{ port: 5390, pid: null }, { port: 5391, pid: null }, { port: 5392, pid: null }]));
+  const pc = createCollector({ root: ROOT, platform: 'linux', execFn: async () => '', readProc: (p) => (p.endsWith('tcp6') ? proc6 : proc4) });
+  const ps = await pc.state(SLUG);
+  check('on Linux without ss the Live state reads the kernel\'s table and says so', ps.ports.map((p) => p.port).join() === '5390,5391' && ps.portsWhy.method === 'proc-net', JSON.stringify(ps.ports));
+  pc.close();
+  check('a script run from a tests folder is a test run, behind flock and env too; reading one is not',
+    kindOf('Bash', { command: 'flock /tmp/pp.lock env PYTHONPATH=. python tests/workspace.py' }) === 'test'
+    && kindOf('Bash', { command: '/usr/bin/python3.12 -u /work/pp/tests/run_all.py' }) === 'test'
+    && kindOf('Bash', { command: 'node tests/interact.mjs' }) === 'test'
+    && kindOf('Bash', { command: 'cat tests/workspace.py' }) === 'tool'
+    && kindOf('Bash', { command: 'python scripts/build.py' }) === 'tool'
+    && kindOf('Bash', { command: 'python -m http.server --directory tests/' }) === 'tool');
 }
 
 /* ---------- the command line ---------- */
@@ -1101,6 +1126,36 @@ for (const f of fs.readdirSync(path.join(HERE, 'web')).filter((x) => x.endsWith(
   const html = fs.readFileSync(path.join(HERE, 'web', 'index.html'), 'utf8');
   const sjs = fs.readFileSync(path.join(HERE, 'web', 'sessions.js'), 'utf8');
   check('the page has a Sessions tab and view, and the app registers it', /data-view="sessions"/.test(html) && /id="view-sessions"/.test(html) && /sessions: createSessionsView\(ctx\)/.test(fs.readFileSync(path.join(HERE, 'web', 'app.js'), 'utf8')) && /panel: 'view-sessions'/.test(sjs));
+}
+
+/* ---------- sessions: a background command from before a restart ---------- */
+
+{
+  const RR = path.join(TMP, 'projects-restart');
+  const RREG = path.join(TMP, 'registry-restart');
+  const RCWD = 'C:\\fixture\\work\\restarted';
+  const RID = '0a1b2c3d-3333-4222-8333-944455556666';
+  const r0 = now - 20 * 60 * 1000;
+  const at = (s) => iso(r0 + s * 1000);
+  const said = (o) => line({ parentUuid: 'p', cwd: RCWD, ...o });
+  const launch = (id, s, bg) => [
+    said({ type: 'assistant', timestamp: at(s), message: { content: [{ type: 'tool_use', id, name: 'Bash', input: { command: 'npm run dev', description: `Serve ${bg}`, run_in_background: true } }] } }),
+    said({ type: 'user', timestamp: at(s + 1), message: { content: [{ type: 'tool_result', tool_use_id: id, content: `Command running in background with ID: ${bg}. Output is being written to: x.output` }] } }),
+  ];
+  write(path.join(RR, slugFor(RCWD), `${RID}.jsonl`), [
+    said({ type: 'user', timestamp: at(0), origin: { kind: 'human' }, message: { role: 'user', content: 'Start the server' } }),
+    ...launch('r1', 10, 'bgold'),
+    said({ type: 'system', subtype: 'turn_duration', timestamp: at(20), durationMs: 20000, messageCount: 4 }),
+    said({ type: 'user', timestamp: at(600), origin: { kind: 'human' }, message: { role: 'user', content: 'Start it again' } }),
+    ...launch('r2', 610, 'bgnew'),
+    said({ type: 'system', subtype: 'turn_duration', timestamp: at(620), durationMs: 20000, messageCount: 4 }),
+  ].join(''));
+  write(path.join(RREG, '101.json'), JSON.stringify({ pid: 101, sessionId: RID, cwd: RCWD, startedAt: r0 + 300 * 1000, kind: 'interactive', status: 'idle', statusUpdatedAt: now - 1000 }));
+  const rs = createSessions({ root: RR, registryDir: RREG, platform: 'linux', probe: () => true });
+  const rv = await rs.view({ session: RID });
+  const bgs = Object.fromEntries((rv.detail?.background || []).map((b) => [b.id, b.status]));
+  check('a background command launched before the session\'s process started reads as stopped, a later one as running',
+    bgs.bgold === 'stopped' && bgs.bgnew === 'running' && /1 background task running/.test(rv.detail?.now?.text || ''), JSON.stringify({ bgs, now: rv.detail?.now?.text }));
 }
 
 fs.rmSync(TMP, { recursive: true, force: true });

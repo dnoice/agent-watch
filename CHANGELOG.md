@@ -4,7 +4,7 @@
     - File Name: CHANGELOG.md
     - Relative Path: CHANGELOG.md
     - Artifact Type: docs
-    - Version: 1.13.0
+    - Version: 1.13.1
     - Date: 11/16/2026
     - Update: Monday, November 16, 2026
     - Author: Dennis 'dendogg' Smaltz
@@ -12,6 +12,8 @@
     - Signature: ︻デ═─── ✦ ✦ ✦ | Aim Twice, Shoot Once!
 
 ✒ Changelog:
+    - 1.13.1 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Added
+      1.13.1, fixes from the first run in a cloud environment.
     - 1.13.0 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Added
       1.13.0, other environments.
     - 1.12.1 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Added
@@ -66,6 +68,26 @@
 -->
 
 # agent-watch changelog
+
+## 1.13.1 (11/16/2026)
+
+[dendogg + Anthropic - Claude Opus 5.5] — Fixes from the first run inside a cloud environment, a
+Claude Code session in a container, where 1.13.0 ran cleanly and three things read wrong.
+
+- **Background commands across a restart:** a command launched before the session's current
+  Claude Code process started now reads as stopped. A restart ends it without a task
+  notification, so it had counted as running for good; the container's session showed twelve
+  background tasks running when none were.
+- **Test runs:** a script run from a `tests/` or `test/` folder by python, node, bun, deno,
+  bash or sh counts as a test run, whatever its file is called and behind `flock` or `env`.
+  The project's suites run as `python tests/workspace.py`, and its Insights read no test runs
+  for a run that ran dozens. Reading such a file is still not a test run.
+- **Test ports without `ss`:** where `ss` is not installed, as in that container, Linux reads
+  the kernel's own `/proc/net/tcp` and `tcp6`, and the Tests view says so. The table names no
+  process, so the ports come without one.
+- **README:** what counts as a test command, why a commit can stay unconfirmed (`git commit -q`,
+  or output cut short before git's summary line), and the background-command rule.
+- Suite: 286 checks, all passing.
 
 ## 1.13.0 (11/16/2026)
 

@@ -4,7 +4,7 @@
     - File Name: README.md
     - Relative Path: README.md
     - Artifact Type: docs
-    - Version: 1.13.0
+    - Version: 1.13.1
     - Date: 11/16/2026
     - Update: Monday, November 16, 2026
     - Author: Dennis 'dendogg' Smaltz
@@ -12,6 +12,9 @@
     - Signature: ︻デ═─── ✦ ✦ ✦ | Aim Twice, Shoot Once!
 
 ✒ Changelog:
+    - 1.13.1 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — What counts
+      as a test run and when a commit stays unconfirmed, background
+      commands across a restart, and the test ports from /proc on Linux.
     - 1.13.0 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Running it
       in another environment, --allow-host and AGENT_WATCH_HOSTS, the Host
       rule in Security, and the test ports from ss on Linux.
@@ -99,8 +102,8 @@ It reads what Claude Code already writes to disk. It changes nothing, and it lis
 - [Node.js](https://nodejs.org/) 20 or later. agent-watch uses Node's own modules only, so there
   is nothing to install.
 - Claude Code on the same machine: agent-watch reads what it writes under `~/.claude`.
-- Optional: `git` on the PATH for a run's commits, and `netstat` (Windows) or `ss` (Linux) for
-  its test ports.
+- Optional: `git` on the PATH for a run's commits, and `netstat` on Windows for its test ports.
+  On Linux they come from `ss`, or from the kernel's own table where `ss` is not installed.
 
 Windows 11 is where it is used most; macOS and Linux run it too.
 
@@ -303,13 +306,13 @@ The page polls every 2.5 seconds while it is visible and stops while its tab is 
 | Closed sessions | Session transcripts, `<project>/<session>.jsonl`, written in the last 24 hours, dated by the newest time inside them (a sync client can touch a file's modified time long after) |
 | A session's activity | Its transcript: prompts and slash commands, replies, tool calls paired with their results, finished turns and their durations, messages sent mid-turn, task notifications, the title, the permission mode and the cost record |
 | A session's subagents | `<session>/subagents/agent-<id>.meta.json` (description, type, model, finished) and each agent's transcript |
-| Background commands | The launch message that opens a Bash or Workflow result ("Command running in background with ID", "Task ID"), finished by its task notification |
+| Background commands | The launch message that opens a Bash or Workflow result ("Command running in background with ID", "Task ID"), finished by its task notification; one launched before the session's Claude Code process started reads as stopped, since a restart ends it without one |
 | A run's agents | `<session>/subagents/workflows/<run>/`: each agent's `.meta.json`, the run's `journal.jsonl`, and each agent's transcript |
 | A finished run | Its saved record, `<session>/workflows/<run>.json`: status, phases, arguments, totals, duration |
 | A resumed run | The same record, which Claude Code saves again with the resume as its start and totals for the resumed part only; the run's start is taken from its first agent, and its totals are summed from its transcripts once they are read |
 | A running run's phases | The workflow script named by the session transcript's Workflow call, whose `meta` block is read without running it |
 | Commits | `git log` in the repository the session ran in, through `execFile` with fixed arguments |
-| Test ports | `netstat -ano` on Windows and `ss -ltnp` on Linux, filtered to the run's own port range, on loopback or every address |
+| Test ports | `netstat -ano` on Windows; on Linux `ss -ltnp`, or `/proc/net/tcp` and `tcp6` where `ss` is not installed. Filtered to the run's own port range, on loopback or every address |
 | Test logs | The newest `.log` files in the run's scratch folder, the last 32 KB of each |
 | The machine | Node's `os` module: CPU from the cores' times, free and total memory |
 
@@ -342,7 +345,10 @@ Counts keep attempts apart from outcomes:
 - **Tool calls**: each call is paired with its result by id, so it is ok, failed, or still open.
 - **Commits**: a `git commit` counts as tried when it is called and as confirmed only when git's
   summary line (`[branch 1a2b3c4] subject`) comes back. "Nothing to commit" counts as failed.
-- **Test runs**: each test command's output is read for its outcome by narrow adapters: the
+  A `git commit -q`, or output cut short before that line, stays tried and unconfirmed.
+- **Test runs**: a test command is a known runner (`npm test`, `pytest`, `node --test` and the
+  like), a script named for tests (`test_x.py`, `x.test.mjs`), or a script run from a `tests/`
+  or `test/` folder. Its output is read for the outcome by narrow adapters: the
   house suites (`  ok   name`, ` FAIL  name`, `<n> passed, <m> failed`), TAP and node:test,
   pytest, Jest and Vitest, and Mocha. Output none of them recognises is counted as unread, not
   as passed.
@@ -439,7 +445,7 @@ unless set) and `AGENT_WATCH_READ_PAUSE` (milliseconds after each megabyte read 
   Anything the service cannot read is skipped, never guessed.
 - A run that stopped without saving a record and has been quiet for 30 minutes reads as
   unfinished; an agent quiet for five minutes is marked quiet but still counted as running.
-- The test ports need `netstat` (Windows) or `ss` (Linux); elsewhere none are listed.
+- The test ports are listed on Windows and Linux only.
 - A session started before Claude Code kept its registry is seen only through its transcript, as
   closed. Cost and lines changed are the last record Claude Code wrote, which it writes now and
   then rather than live, so they can trail the work; a resumed session counts from the resume.
