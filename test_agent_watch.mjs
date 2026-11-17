@@ -2,11 +2,11 @@
 /*
  * ============================================================================
  * ✒ Metadata
- *     - Title: Agent Watch Test Suite (dd1 Tools Edition - v1.12)
+ *     - Title: Agent Watch Test Suite (dd1 Tools Edition - v1.13)
  *     - File Name: test_agent_watch.mjs
  *     - Relative Path: test_agent_watch.mjs
  *     - Artifact Type: test
- *     - Version: 1.12.0
+ *     - Version: 1.13.0
  *     - Date: 11/16/2026
  *     - Update: Monday, November 16, 2026
  *     - Author: Dennis 'dendogg' Smaltz
@@ -14,6 +14,10 @@
  *     - Signature: ︻デ═─── ✦ ✦ ✦ | Aim Twice, Shoot Once!
  *
  * ✒ Changelog:
+ *     - 1.13.0 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Checks
+ *       for other environments: Host names allowed and refused, the
+ *       refusal's message, --allow-host's guard, and the test ports from
+ *       netstat and from ss. 282 checks.
  *     - 1.12.0 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Checks
  *       for the sessions reader against a fake registry and process list:
  *       prompts, turns, background commands, subagent lanes, the now line,
@@ -122,7 +126,7 @@ import path from 'node:path';
 import http from 'node:http';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { metaOf, toolSummary, readNew, listProjects, createCollector, facts } from './lib/collect.mjs';
+import { metaOf, toolSummary, readNew, listProjects, createCollector, facts, listeningPorts } from './lib/collect.mjs';
 import { readNewAsync, createHealth, readJson } from './lib/read.mjs';
 import { freshAgent, ingestAgentLine, agentStats, argsOf } from './lib/claude.mjs';
 import { parseTestOutput, verdict, classify } from './lib/tests.mjs';
@@ -137,7 +141,7 @@ import { fileMap, history } from './lib/files.mjs';
 import { profile } from './lib/profile.mjs';
 import { runInsights, projectTrends, bucketFor, KINDS } from './lib/insights.mjs';
 import { loadCriteria, writeStarter, evaluate, report, STARTER } from './lib/handoff.mjs';
-import { startServer, webFiles } from './lib/server.mjs';
+import { startServer, webFiles, hostName } from './lib/server.mjs';
 import { slugFor, readRegistry, alivePids, userKind, taskNote, freshSession, sessionLineFilter, ingestSessionLine, peek, createSessions } from './lib/sessions.mjs';
 import { resolveProject, stamp, VERSION } from './agent-watch.mjs';
 import { drawingOf, inlineOf, figureOf, sync as logoSync } from './logo-sync.mjs';
@@ -837,6 +841,53 @@ const stop = await get(P, '/api/stop', { method: 'POST', headers: { 'X-Agent-Wat
 await new Promise((r) => setTimeout(r, 300));
 check('/api/stop with the token closes the server', stop.status === 200 && stopped && (await get(P, '/api/health')).status === 0);
 
+/* ---------- other environments: hosts and listening ports ---------- */
+
+check('hostName reads a Host header\'s name without its port, and refuses what is no host name',
+  hostName('Preview.Example.COM:443') === 'preview.example.com' && hostName('[::1]:4300') === '::1' && hostName('localhost') === 'localhost' && hostName('a b') === null && hostName('x:y:z') === null && hostName('') === null);
+{
+  const seen = [];
+  const hs = await startServer({ port: 0, root: ROOT, version: VERSION, stateDir: path.join(TMP, 'state-hosts'), indexDelayMs: 0, watch: false, allowHosts: ['preview.example'], onRefused: (n) => seen.push(n) });
+  const at = (Host) => get(hs.port, '/api/health', { headers: { Host } });
+  check('a name given with allowHosts is answered on any port and in any case, beside localhost',
+    (await at('preview.example')).status === 200 && (await at('PREVIEW.example:443')).status === 200 && (await at(`localhost:${hs.port}`)).status === 200);
+  const other = await at('other.example:8080');
+  check('a name not allowed is refused with the flag that answers it, and is noted once',
+    other.status === 403 && other.body.includes('Wrong host: other.example.') && other.body.includes('--allow-host other.example') && (await at('other.example')).status === 403 && seen.join() === 'other.example');
+  const junk = await at('no host!');
+  check('a Host that is no host name is refused without being repeated back or noted', junk.status === 403 && junk.body === 'Wrong host.' && seen.length === 1);
+  await hs.close();
+}
+{
+  const ns = [
+    '  TCP    0.0.0.0:135            0.0.0.0:0              LISTENING       1172',
+    '  TCP    127.0.0.1:5390         0.0.0.0:0              LISTENING       4242',
+    '  TCP    0.0.0.0:5391           0.0.0.0:0              LISTENING       4243',
+    '  TCP    192.168.1.9:5392       0.0.0.0:0              LISTENING       9',
+    '  TCP    127.0.0.1:5390         127.0.0.1:61000        ESTABLISHED     4242',
+  ].join('\r\n');
+  check('netstat gives the ports in range on loopback or every address, with their processes',
+    JSON.stringify(listeningPorts(ns, 5390, 5392)) === JSON.stringify([{ port: 5390, pid: 4242 }, { port: 5391, pid: 4243 }]));
+  const ssOut = [
+    'LISTEN 0      511        127.0.0.1:5390      0.0.0.0:*    users:(("node",pid=4242,fd=21))',
+    'LISTEN 0      4096         0.0.0.0:5391      0.0.0.0:*',
+    'LISTEN 0      511            [::1]:5392         [::]:*    users:(("vite",pid=77,fd=3))',
+    'LISTEN 0      511         10.0.0.4:5393      0.0.0.0:*    users:(("x",pid=1,fd=3))',
+  ].join('\n');
+  check('ss gives them on Linux, with a process only where ss could see one',
+    JSON.stringify(listeningPorts(ssOut, 5390, 5393)) === JSON.stringify([{ port: 5390, pid: 4242 }, { port: 5391, pid: null }, { port: 5392, pid: 77 }]));
+  const asked = [];
+  const lc = createCollector({ root: ROOT, platform: 'linux', execFn: async (cmd, args) => { asked.push([cmd, ...args].join(' ')); return ssOut; } });
+  const ls = await lc.state(SLUG);
+  check('on Linux the Live state asks ss for the run\'s ports and says so', asked.includes('ss -Hltnp') && ls.ports.map((p) => p.port).join() === '5390,5391' && ls.portsWhy.method === 'ss');
+  lc.close();
+  const none = [];
+  const dc = createCollector({ root: ROOT, platform: 'darwin', execFn: async (cmd) => { none.push(cmd); return ''; } });
+  const ds = await dc.state(SLUG);
+  check('a platform with no port listing asks nothing and says the ports are unavailable', none.length === 0 && ds.ports.length === 0 && ds.portsWhy.completeness === 'unavailable');
+  dc.close();
+}
+
 /* ---------- the command line ---------- */
 
 const cli = (...a) => spawnSync(process.execPath, [path.join(HERE, 'agent-watch.mjs'), ...a], { encoding: 'utf8', env: { ...process.env, AGENT_WATCH_STATE: path.join(TMP, 'state') } });
@@ -845,6 +896,7 @@ const help = cli('--help');
 check('--help lists the commands and options', help.status === 0 && /serve/.test(help.stdout) && /--project/.test(help.stdout));
 check('an unknown option exits 2 and says so', cli('serve', '--nope').status === 2 && /Unknown option/.test(cli('serve', '--nope').stderr));
 check('a bad port exits 2', cli('serve', '--port', '99999').status === 2);
+check('--allow-host refuses a wildcard or a name with spaces, exit 2', cli('serve', '--allow-host', '*').status === 2 && /no wildcard/.test(cli('serve', '--allow-host', '*').stderr) && cli('serve', '--allow-host', 'a b').status === 2);
 const pr = cli('projects', '--root', ROOT);
 check('projects lists the fixture project with its folder', pr.status === 0 && pr.stdout.includes('my-project') && pr.stdout.includes(CWD), pr.stdout);
 check('status with nothing running says so', /not running/.test(cli('status').stdout));

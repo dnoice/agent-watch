@@ -2,11 +2,11 @@
 /*
  * ============================================================================
  * ✒ Metadata
- *     - Title: Agent Watch (dd1 Tools Edition - v1.12)
+ *     - Title: Agent Watch (dd1 Tools Edition - v1.13)
  *     - File Name: agent-watch.mjs
  *     - Relative Path: agent-watch.mjs
  *     - Artifact Type: CLI
- *     - Version: 1.12.1
+ *     - Version: 1.13.0
  *     - Date: 11/16/2026
  *     - Update: Monday, November 16, 2026
  *     - Author: Dennis 'dendogg' Smaltz
@@ -14,6 +14,10 @@
  *     - Signature: ︻デ═─── ✦ ✦ ✦ | Aim Twice, Shoot Once!
  *
  * ✒ Changelog:
+ *     - 1.13.0 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Version
+ *       1.13.0, in other environments: --allow-host and AGENT_WATCH_HOSTS
+ *       answer a preview pane or port forward that reaches the page under
+ *       another name, and the service's output names each host it refused.
  *     - 1.12.1 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Version
  *       1.12.1, its own public repository: the examples name a generic
  *       project, and the state folder is given for every platform.
@@ -87,6 +91,9 @@
  *     - notices: what the service's watchpoints noticed, newest first; the
  *       service watches every project while it runs (--no-watch turns it off,
  *       --quiet-alert sets the minutes before a quiet agent is noticed)
+ *     - --allow-host: answer a preview pane or port forward that reaches
+ *       the page under another name, for Claude Code in a container, WSL
+ *       or a cloud environment; it still listens on 127.0.0.1 only
  *     - --project takes a slug, the project's own folder path or its name,
  *       including a project that has not run a workflow yet
  *     - Zero dependencies: Node's own modules only
@@ -102,6 +109,7 @@
  *     node agent-watch.mjs serve --port 4310
  *     node agent-watch.mjs start --project "C:\work\my-project"
  *     node agent-watch.mjs start --open
+ *     node agent-watch.mjs start --allow-host preview.example.com
  *     node agent-watch.mjs status --lines 8
  *     node agent-watch.mjs sessions
  *     node agent-watch.mjs projects
@@ -120,6 +128,8 @@
  *                                (default ~/.claude/projects)
  *     Output:
  *         --port <n>             Port on 127.0.0.1 (default 4300)
+ *         --allow-host <name>    serve, start: also answer this host name
+ *                                (repeatable; or AGENT_WATCH_HOSTS)
  *         --open                 Open the page in the default browser
  *         --lines <n>            status, sessions: how many recent actions
  *                                (default 5);
@@ -140,14 +150,15 @@
  *         --help, --version
  *
  * ✒ Other Important Information:
- *     - Dependencies: Node.js 20+; git and netstat on PATH for the commits
- *       and the test ports (optional)
+ *     - Dependencies: Node.js 20+; git on PATH for the commits, and netstat
+ *       (Windows) or ss (Linux) for the test ports (optional)
  *     - Compatible platforms: Windows 11 (primary); macOS and Linux
  *     - State: %LOCALAPPDATA%\agent-watch on Windows, ~/.local/state/
  *       agent-watch elsewhere, or AGENT_WATCH_STATE (state.json with the
  *       pid, port and stop token; agent-watch.log), outside the checkout
- *     - Security: listens on 127.0.0.1 only and checks the Host header; it
- *       reads Claude's transcripts, which hold prompts and tool output
+ *     - Security: listens on 127.0.0.1 only and answers a Host of
+ *       127.0.0.1, localhost or a name given with --allow-host; it reads
+ *       Claude's transcripts, which hold prompts and tool output
  * ----------------------------------------------------------------------------
  */
 
@@ -168,7 +179,7 @@ import { casesOf } from './lib/compare.mjs';
 import { fileMap } from './lib/files.mjs';
 import { loadCriteria, evaluate, report, writeStarter, TYPES } from './lib/handoff.mjs';
 
-export const VERSION = '1.12.1';
+export const VERSION = '1.13.0';
 const SELF = fileURLToPath(import.meta.url);
 const STATE_DIR = process.env.AGENT_WATCH_STATE
   || (process.platform === 'win32'
@@ -206,6 +217,9 @@ const HELP = `
     --project <slug|path|name>  The project (default: newest activity)
     --root <dir>            Claude's projects folder (default ~/.claude/projects)
     --port <n>              Port on 127.0.0.1 (default 4300)
+    --allow-host <name>     serve, start: also answer requests for this host name, as
+                            a preview pane or port forward sends them (repeatable;
+                            AGENT_WATCH_HOSTS takes a comma-separated list)
     --open                  Open the page in the default browser
     --lines <n>             status, sessions: recent actions (default 5); runs, search:
                             how many runs (default 20)
@@ -221,7 +235,7 @@ const HELP = `
 `;
 
 function parseArgs(argv) {
-  const out = { cmd: null, port: 4300, project: null, root: path.join(os.homedir(), '.claude', 'projects'), open: false, lines: null, status: null, words: [], quietAlert: null, watch: true, run: null, format: 'md', out: null, workflow: null };
+  const out = { cmd: null, port: 4300, project: null, root: path.join(os.homedir(), '.claude', 'projects'), open: false, lines: null, status: null, words: [], quietAlert: null, watch: true, run: null, format: 'md', out: null, workflow: null, allowHosts: [] };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const val = () => {
@@ -236,6 +250,7 @@ function parseArgs(argv) {
     else if (a === '--root') out.root = path.resolve(val());
     else if (a === '--lines') out.lines = Number(val());
     else if (a === '--open') out.open = true;
+    else if (a === '--allow-host') out.allowHosts.push(hostArg(val(), a));
     else if (a === '--status') out.status = val();
     else if (a === '--quiet-alert') out.quietAlert = Number(val());
     else if (a === '--no-watch') out.watch = false;
@@ -248,6 +263,8 @@ function parseArgs(argv) {
     else if (out.cmd === 'search') out.words.push(a);
     else throw new Error(`Unexpected argument ${a}. See --help.`);
   }
+  for (const h of String(process.env.AGENT_WATCH_HOSTS || '').split(',').map((x) => x.trim()).filter(Boolean)) out.allowHosts.push(hostArg(h, 'AGENT_WATCH_HOSTS'));
+  out.allowHosts = [...new Set(out.allowHosts)];
   if (!Number.isInteger(out.port) || out.port < 1 || out.port > 65535) throw new Error('--port takes a whole number from 1 to 65535.');
   if (out.lines !== null && (!Number.isInteger(out.lines) || out.lines < 0 || out.lines > 200)) throw new Error('--lines takes a whole number from 0 to 200.');
   if (out.quietAlert !== null && (!Number.isInteger(out.quietAlert) || out.quietAlert < 0 || out.quietAlert > 1440)) throw new Error('--quiet-alert takes a whole number of minutes from 0 to 1440.');
@@ -256,6 +273,15 @@ function parseArgs(argv) {
   if (out.workflow !== null && !/^[\w. -]{1,100}$/.test(out.workflow)) throw new Error('--workflow takes a workflow name.');
   if (out.status !== null && !/^[a-z]{3,20}$/.test(out.status)) throw new Error('--status takes a status such as completed, killed, unfinished or running.');
   return out;
+}
+
+/** A name for --allow-host or AGENT_WATCH_HOSTS: one host name or IPv4 address, lower-cased, its port dropped. */
+function hostArg(v, from) {
+  const name = String(v).trim().toLowerCase().replace(/:\d{1,5}$/, '');
+  if (!/^(?=.{1,253}$)[a-z0-9_]([a-z0-9_-]*[a-z0-9_])?(\.[a-z0-9_]([a-z0-9_-]*[a-z0-9_])?)*$/.test(name)) {
+    throw new Error(`${from} takes host names such as preview.example.com, not "${String(v).slice(0, 60)}"; there is no wildcard.`);
+  }
+  return name;
 }
 
 /** A project given as a slug, its folder path or its folder's name, matched against what exists. */
@@ -327,7 +353,7 @@ const ago = (ms) => {
 async function serve(opts) {
   const project = resolveProject(opts.root, opts.project);
   const token = process.env.AGENT_WATCH_TOKEN || crypto.randomBytes(24).toString('base64url');
-  const s = await startServer({ port: opts.port, root: opts.root, project, token, version: VERSION, onStop: () => finish(0), stateDir: STATE_DIR, watch: opts.watch, rules: opts.quietAlert === null ? {} : { quiet: opts.quietAlert > 0, quietMinutes: opts.quietAlert } });
+  const s = await startServer({ port: opts.port, root: opts.root, project, token, version: VERSION, onStop: () => finish(0), stateDir: STATE_DIR, watch: opts.watch, rules: opts.quietAlert === null ? {} : { quiet: opts.quietAlert > 0, quietMinutes: opts.quietAlert }, allowHosts: opts.allowHosts, onRefused: (name) => console.log(`  Refused a request for host ${name}. If it is your own preview or port forward, --allow-host ${name} answers it.`) });
   fs.mkdirSync(STATE_DIR, { recursive: true });
   fs.writeFileSync(STATE, JSON.stringify({ pid: process.pid, port: s.port, token, project, started: Date.now(), log: LOG }, null, 2));
   const finish = (code) => {
@@ -337,7 +363,8 @@ async function serve(opts) {
   };
   process.on('SIGINT', () => s.close().then(() => finish(0)));
   process.on('SIGTERM', () => s.close().then(() => finish(0)));
-  console.log(`\n  agent-watch ${VERSION}\n  Projects : ${opts.root}\n  Project  : ${project || 'the one with the newest activity'}\n  Open     : ${s.url}\n\n  Ctrl+C to stop.\n`);
+  const also = opts.allowHosts.length ? `  Answers  : 127.0.0.1, localhost, ${opts.allowHosts.join(', ')}\n` : '';
+  console.log(`\n  agent-watch ${VERSION}\n  Projects : ${opts.root}\n  Project  : ${project || 'the one with the newest activity'}\n  Open     : ${s.url}\n${also}\n  Ctrl+C to stop.\n`);
   if (opts.open) openPage(s.url);
 }
 
@@ -359,6 +386,7 @@ async function start(opts) {
   if (opts.project) args.push('--project', opts.project);
   if (opts.quietAlert !== null) args.push('--quiet-alert', String(opts.quietAlert));
   if (!opts.watch) args.push('--no-watch');
+  for (const h of opts.allowHosts) args.push('--allow-host', h);
   const child = spawn(process.execPath, args, {
     detached: true, windowsHide: true, stdio: ['ignore', log, log], env: { ...process.env, AGENT_WATCH_TOKEN: token },
   });
@@ -368,6 +396,7 @@ async function start(opts) {
     const h = await health(opts.port);
     if (h && h.pid === child.pid) {
       console.log(`  agent-watch ${VERSION} is running in the background: http://127.0.0.1:${opts.port}/ (pid ${child.pid})`);
+      if (opts.allowHosts.length) console.log(`  It also answers requests for: ${opts.allowHosts.join(', ')}`);
       console.log(`  Stop it with: node agent-watch.mjs stop`);
       if (opts.open) openPage(`http://127.0.0.1:${opts.port}/`);
       return 0;

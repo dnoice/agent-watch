@@ -1,10 +1,10 @@
 <!--
 ✒ Metadata
-    - Title: Agent Watch Readme (dd1 Tools Edition - v1.12)
+    - Title: Agent Watch Readme (dd1 Tools Edition - v1.13)
     - File Name: README.md
     - Relative Path: README.md
     - Artifact Type: docs
-    - Version: 1.12.1
+    - Version: 1.13.0
     - Date: 11/16/2026
     - Update: Monday, November 16, 2026
     - Author: Dennis 'dendogg' Smaltz
@@ -12,6 +12,9 @@
     - Signature: ︻デ═─── ✦ ✦ ✦ | Aim Twice, Shoot Once!
 
 ✒ Changelog:
+    - 1.13.0 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Running it
+      in another environment, --allow-host and AGENT_WATCH_HOSTS, the Host
+      rule in Security, and the test ports from ss on Linux.
     - 1.12.1 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Written
       for anyone who clones it: what it needs, getting it, the commands
       through node (digi is the collection's launcher), the state folder on
@@ -66,6 +69,8 @@
 
 ✒ Key Features:
     - What it needs, getting it, and starting, stopping and checking it
+    - Running it where Claude Code runs: a container, WSL or a cloud
+      environment
     - The page, region by region
     - Where every figure comes from, and what is read incrementally
     - The security model and the limits
@@ -94,7 +99,8 @@ It reads what Claude Code already writes to disk. It changes nothing, and it lis
 - [Node.js](https://nodejs.org/) 20 or later. agent-watch uses Node's own modules only, so there
   is nothing to install.
 - Claude Code on the same machine: agent-watch reads what it writes under `~/.claude`.
-- Optional: `git` on the PATH for a run's commits, and `netstat` (Windows) for its test ports.
+- Optional: `git` on the PATH for a run's commits, and `netstat` (Windows) or `ss` (Linux) for
+  its test ports.
 
 Windows 11 is where it is used most; macOS and Linux run it too.
 
@@ -131,6 +137,7 @@ collection, where it began, `digi agent-watch <command>` runs them.
 | ------ | ------------ |
 | `--project <slug, path or name>` | The project. A folder path or the folder's name works as well as Claude's slug, and a project that has not run a workflow yet is accepted. Without it, the project with the newest workflow activity. |
 | `--port <n>` | Port on 127.0.0.1. 4300 unless given. |
+| `--allow-host <name>` | `start` and `serve`: answer requests for this host name as well as 127.0.0.1 and localhost, as a preview pane or port forward sends them. Give it once per name; `AGENT_WATCH_HOSTS` takes a comma-separated list. See [In another environment](#in-another-environment). |
 | `--open` | Open the page in the default browser once it answers. |
 | `--root <dir>` | Claude's projects folder, if not `~/.claude/projects`. |
 | `--lines <n>` | `status` and `sessions`: how many of the newest actions to print, 5 unless given. `runs` and `search`: how many runs, 20 unless given. |
@@ -145,6 +152,26 @@ collection, where it began, `digi agent-watch <command>` runs them.
 The page itself can switch projects from the picker in its header, and its choice of project and
 theme is kept in the browser. The address keeps the view, the run and the agent, so a link opens
 the same place.
+
+## In another environment
+
+agent-watch reads the files Claude Code writes, so it runs where Claude Code runs. A session in a
+container, a virtual machine, WSL or a cloud environment writes its transcripts there, and a copy
+of agent-watch on your desktop cannot see them. Clone it inside that environment and start it
+there:
+
+```text
+git clone https://github.com/dnoice/agent-watch.git
+node agent-watch/agent-watch.mjs start
+node agent-watch/agent-watch.mjs sessions
+```
+
+The terminal commands (`status`, `sessions`, `runs`, `search`, `notices`, `handoff`) need no
+page. The page answers only requests addressed to 127.0.0.1 or localhost. When a preview pane or
+a port forward reaches it under another name, the request is refused with a message naming that
+host, and the service's output (`agent-watch.log` in the state folder, under `start`) notes it.
+Start agent-watch with `--allow-host <name>`, or set `AGENT_WATCH_HOSTS`, to answer that name as
+well. It still listens on 127.0.0.1 only.
 
 ## The page
 
@@ -282,7 +309,7 @@ The page polls every 2.5 seconds while it is visible and stops while its tab is 
 | A resumed run | The same record, which Claude Code saves again with the resume as its start and totals for the resumed part only; the run's start is taken from its first agent, and its totals are summed from its transcripts once they are read |
 | A running run's phases | The workflow script named by the session transcript's Workflow call, whose `meta` block is read without running it |
 | Commits | `git log` in the repository the session ran in, through `execFile` with fixed arguments |
-| Test ports | `netstat -ano`, filtered to the run's own port range (Windows only) |
+| Test ports | `netstat -ano` on Windows and `ss -ltnp` on Linux, filtered to the run's own port range, on loopback or every address |
 | Test logs | The newest `.log` files in the run's scratch folder, the last 32 KB of each |
 | The machine | Node's `os` module: CPU from the cores' times, free and total memory |
 
@@ -383,8 +410,9 @@ and the home folder written as `~`).
 ## Security
 
 - It listens on 127.0.0.1 and nowhere else.
-- A request whose `Host` is not 127.0.0.1 or localhost on its own port is refused, so a web page
-  cannot reach it through a renamed host.
+- A request whose `Host` is not 127.0.0.1 or localhost on its own port, or a name given with
+  `--allow-host`, is refused, so a web page cannot reach it through a renamed host. The refusal
+  names the host it was sent.
 - It answers GET, and one POST: `/api/stop`, which needs the token written to the state folder
   when the service started. `stop` sends that token; nothing stops it by process id.
 - Its files are served from an allow list, never from a path in the URL.
@@ -411,7 +439,7 @@ unless set) and `AGENT_WATCH_READ_PAUSE` (milliseconds after each megabyte read 
   Anything the service cannot read is skipped, never guessed.
 - A run that stopped without saving a record and has been quiet for 30 minutes reads as
   unfinished; an agent quiet for five minutes is marked quiet but still counted as running.
-- The test ports need `netstat`, so they are listed on Windows only.
+- The test ports need `netstat` (Windows) or `ss` (Linux); elsewhere none are listed.
 - A session started before Claude Code kept its registry is seen only through its transcript, as
   closed. Cost and lines changed are the last record Claude Code wrote, which it writes now and
   then rather than live, so they can trail the work; a resumed session counts from the resume.

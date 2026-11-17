@@ -1,10 +1,10 @@
 <!--
 ✒ Metadata
-    - Title: Agent Watch Changelog (dd1 Tools Edition - v1.12)
+    - Title: Agent Watch Changelog (dd1 Tools Edition - v1.13)
     - File Name: CHANGELOG.md
     - Relative Path: CHANGELOG.md
     - Artifact Type: docs
-    - Version: 1.12.1
+    - Version: 1.13.0
     - Date: 11/16/2026
     - Update: Monday, November 16, 2026
     - Author: Dennis 'dendogg' Smaltz
@@ -12,6 +12,8 @@
     - Signature: ︻デ═─── ✦ ✦ ✦ | Aim Twice, Shoot Once!
 
 ✒ Changelog:
+    - 1.13.0 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Added
+      1.13.0, other environments.
     - 1.12.1 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Added
       1.12.1, its own public repository.
     - 1.12.0 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Added
@@ -64,6 +66,29 @@
 -->
 
 # agent-watch changelog
+
+## 1.13.0 (11/16/2026)
+
+[dendogg + Anthropic - Claude Opus 5.5] — agent-watch in other environments. It reads the files
+Claude Code writes, so a session in a container, WSL or a cloud environment is watched by a copy
+running there, and this release removes what stood in the way of that copy's page and Tests view.
+
+- **`--allow-host <name>`** (repeatable) and **`AGENT_WATCH_HOSTS`** (comma-separated) name hosts
+  the page also answers, on any port, beside 127.0.0.1 and localhost on its own port. A preview
+  pane or port forward that reaches the page under its own name was refused as a possible DNS
+  rebinding attack; naming it lets it through. A wildcard is refused, and the service still
+  listens on 127.0.0.1 only. `start` passes the names on to the service it starts.
+- **A refused host is named.** The 403 says which host was refused and, should it be the user's
+  own preview or port forward, the `--allow-host` that answers it. The service's output (its log,
+  under `start`) notes each refused name once, so the name a preview uses is found by trying it.
+  A Host that is no host name is refused as before, without being repeated back.
+- **Test ports on Linux:** read from `ss -Hltnp`, beside `netstat -ano` on Windows, through one
+  reader, `listeningPorts()`. On both, a port listening on every address now counts as well as
+  one on loopback, since a dev server in a container usually binds every address. On other
+  platforms the Tests view says the ports are unavailable, and nothing is run.
+- **README:** a section on running it in another environment, the new option, and the Host
+  rule in Security.
+- Suite: 282 checks, all passing.
 
 ## 1.12.1 (11/16/2026)
 

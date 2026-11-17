@@ -1,10 +1,10 @@
 <!--
 ✒ Metadata
-    - Title: Agent Watch Package Manifest (dd1 Tools Edition - v1.12)
+    - Title: Agent Watch Package Manifest (dd1 Tools Edition - v1.13)
     - File Name: package.json
     - Relative Path: package.json
     - Artifact Type: config
-    - Version: 1.12.1
+    - Version: 1.13.0
     - Date: 11/16/2026
     - Update: Monday, November 16, 2026
     - Author: Dennis 'dendogg' Smaltz
@@ -12,6 +12,8 @@
     - Signature: ︻デ═─── ✦ ✦ ✦ | Aim Twice, Shoot Once!
 
 ✒ Changelog:
+    - 1.13.0 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Version
+      1.13.0, other environments.
     - 1.12.1 (11/16/2026) [dendogg + Anthropic - Claude Opus 5.5] — Version
       1.12.1; the license, Apache-2.0, and the repository, its home page
       and its issues.
